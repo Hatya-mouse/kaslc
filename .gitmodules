@@ -1,0 +1,3 @@
+[submodule "kasl_std"]
+	path = kasl_std
+	url = https://github.com/hatya-mouse/kasl_std
