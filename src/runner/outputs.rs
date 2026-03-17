@@ -2,6 +2,7 @@ use kasl::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
+use owo_colors::OwoColorize;
 
 fn print_value(
     ptr: *const u8,
@@ -46,8 +47,10 @@ pub(super) fn print_outputs(
     ptrs: &[*mut ()],
     type_registry: &TypeRegistry,
 ) {
+    println!("{}", " OUTPUTS ".on_green().bold());
+
     for (item, ptr) in blueprint.get_outputs().iter().zip(ptrs.iter()) {
-        print!("output[{}]: ", item.name);
+        print!("{}: ", item.name);
         print_value(*ptr as *const u8, &item.value_type, type_registry, 0);
         println!();
     }

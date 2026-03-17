@@ -50,7 +50,7 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
         };
 
         // Ask for inputs
-        let inputs = match ask_for_inputs(&blueprint) {
+        let inputs = match ask_for_inputs(&blueprint, &compiler.prog_ctx.type_registry) {
             Ok(inputs) => inputs,
             Err(e) => match e {
                 InputError::NonPrimitiveInput => {
@@ -69,6 +69,7 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
         // Run the program with the given inputs
         compiler.run(&blueprint, &inputs, &outputs, &states);
 
+        println!();
         print_outputs(&blueprint, &outputs, &compiler.prog_ctx.type_registry);
 
         deallocate_blueprint_ptr(blueprint.get_outputs(), outputs);

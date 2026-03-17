@@ -1,7 +1,8 @@
 use kasl::{
     scope_manager::IOBlueprint,
-    type_registry::{PrimitiveType, ResolvedType},
+    type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
+use owo_colors::{AnsiColors, DynColors, OwoColorize};
 use std::{
     alloc::{Layout, alloc},
     io,
@@ -15,8 +16,23 @@ pub(super) enum InputError {
     VoidInput,
 }
 
-pub(super) fn ask_for_inputs(blueprint: &IOBlueprint) -> Result<Vec<*mut ()>, InputError> {
+pub(super) fn ask_for_inputs(
+    blueprint: &IOBlueprint,
+    type_registry: &TypeRegistry,
+) -> Result<Vec<*mut ()>, InputError> {
     let inputs = blueprint.get_inputs();
+
+    // Print the list of inputs first
+    println!("{}", " INPUTS ".on_red().bold());
+    for input in inputs {
+        let type_color = get_type_color(&input.value_type);
+        let type_string = type_registry.format_type(&input.value_type);
+        println!(
+            "{}: {}",
+            input.name.bold(),
+            type_string.color(type_color).bold()
+        );
+    }
 
     // If the input has non-primitive type, warn user and skip asking for input
     if inputs
@@ -27,19 +43,27 @@ pub(super) fn ask_for_inputs(blueprint: &IOBlueprint) -> Result<Vec<*mut ()>, In
     }
 
     let mut parsed_inputs = Vec::new();
-    for (index, input) in inputs.iter().enumerate() {
+    for input in inputs {
+        let type_color = get_type_color(&input.value_type);
+        let type_string = type_registry.format_type(&input.value_type);
+        print!(
+            "Enter {} input for {}: ",
+            type_string.color(type_color).bold(),
+            input.name.bold()
+        );
+
         match input.value_type {
             ResolvedType::Primitive(prim_type) => match prim_type {
                 PrimitiveType::Bool => {
-                    let value = ask_for_bool(index);
+                    let value = ask_for_bool();
                     parsed_inputs.push(alloc_for_type(value));
                 }
                 PrimitiveType::Float => {
-                    let value: f32 = ask_for_number(index);
+                    let value: f32 = ask_for_number();
                     parsed_inputs.push(alloc_for_type(value));
                 }
                 PrimitiveType::Int => {
-                    let value: i32 = ask_for_number(index);
+                    let value: i32 = ask_for_number();
                     parsed_inputs.push(alloc_for_type(value));
                 }
                 PrimitiveType::Void => {
@@ -55,12 +79,11 @@ pub(super) fn ask_for_inputs(blueprint: &IOBlueprint) -> Result<Vec<*mut ()>, In
     Ok(parsed_inputs)
 }
 
-fn ask_for_bool(index: usize) -> bool {
+fn ask_for_bool() -> bool {
     loop {
         let mut input_str = String::new();
 
         // Read the user'a input
-        println!("Enter Bool input for the input #{}", index);
         io::stdin().read_line(&mut input_str).unwrap();
 
         // Parse the input
@@ -72,12 +95,11 @@ fn ask_for_bool(index: usize) -> bool {
     }
 }
 
-fn ask_for_number<T: FromStr>(index: usize) -> T {
+fn ask_for_number<T: FromStr>() -> T {
     loop {
         let mut input_str = String::new();
 
         // Read the user'a input
-        println!("Enter Int input for the input #{}", index);
         io::stdin().read_line(&mut input_str).unwrap();
 
         // Parse the input
@@ -94,5 +116,17 @@ fn alloc_for_type<T: Sized>(value: T) -> *mut () {
         let ptr = alloc(layout) as *mut T;
         ptr.write(value);
         ptr as *mut ()
+    }
+}
+
+fn get_type_color(value_type: &ResolvedType) -> DynColors {
+    match value_type {
+        ResolvedType::Primitive(prim_type) => match prim_type {
+            PrimitiveType::Bool => DynColors::Ansi(AnsiColors::Magenta),
+            PrimitiveType::Float => DynColors::Ansi(AnsiColors::Cyan),
+            PrimitiveType::Int => DynColors::Ansi(AnsiColors::Blue),
+            PrimitiveType::Void => DynColors::Ansi(AnsiColors::White),
+        },
+        ResolvedType::Struct(_) => DynColors::Ansi(AnsiColors::Yellow),
     }
 }
