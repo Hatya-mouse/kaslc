@@ -162,13 +162,13 @@ pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
                 spinner.finish_and_clear();
                 if iterations > 1 {
                     println!(
-                        "{} {} times in {}μs (max: {}, min: {}, avg: {})\n",
+                        "{} {} times in {}μs (max: {}ns, min: {}ns, avg: {}ns)\n",
                         "Executed".green().bold(),
                         iterations.cyan().bold(),
                         exec_elapsed.as_micros().yellow().bold(),
-                        max_elapsed.as_micros().yellow().bold(),
-                        min_elapsed.as_micros().yellow().bold(),
-                        avg_elapsed.as_micros().yellow().bold(),
+                        max_elapsed.as_nanos().yellow().bold(),
+                        min_elapsed.as_nanos().yellow().bold(),
+                        avg_elapsed.as_nanos().yellow().bold(),
                     );
                 } else {
                     println!(
