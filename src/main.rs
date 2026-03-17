@@ -1,14 +1,14 @@
 mod cli;
+mod runner;
 mod std_installer;
 mod subcommands;
 
+use crate::{runner::run_target, std_installer::install_std};
 use clap::Parser;
 use cli::Cli;
 use rust_embed::RustEmbed;
 use std::{env, path::Path};
 use subcommands::Subcommands;
-
-use crate::std_installer::install_std;
 
 #[derive(RustEmbed)]
 #[folder = "kasl_std/std"]
@@ -37,6 +37,14 @@ fn main() {
         Subcommands::Install { std_path } => {
             let copy_path = Path::new(std_path.as_ref().unwrap_or(&default_std_path));
             install_std(copy_path).unwrap();
+        }
+        Subcommands::Run { target_path } => {
+            let target_path = Path::new(target_path);
+            let std_path = Path::new(&default_std_path);
+            run_target(target_path, std_path.to_path_buf());
+        }
+        Subcommands::StdPath => {
+            println!("Standard library path: {}", default_std_path);
         }
     }
 }

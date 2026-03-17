@@ -8,4 +8,10 @@ pub enum Subcommands {
         #[arg(long)]
         std_path: Option<String>,
     },
+
+    /// Compiles and runs a target KASL file.
+    Run { target_path: String },
+
+    /// Prints the path to the standard library.
+    StdPath,
 }
