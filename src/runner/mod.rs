@@ -151,15 +151,23 @@ pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
                 avg_elapsed,
             } => {
                 spinner.finish_and_clear();
-                println!(
-                    "{} {} times in {}μs (max: {}, min: {}, avg: {})\n",
-                    "Executed".green().bold(),
-                    iterations.cyan().bold(),
-                    exec_elapsed.as_micros().yellow().bold(),
-                    max_elapsed.as_micros().yellow().bold(),
-                    min_elapsed.as_micros().yellow().bold(),
-                    avg_elapsed.as_micros().yellow().bold(),
-                );
+                if iterations > 1 {
+                    println!(
+                        "{} {} times in {}μs (max: {}, min: {}, avg: {})\n",
+                        "Executed".green().bold(),
+                        iterations.cyan().bold(),
+                        exec_elapsed.as_micros().yellow().bold(),
+                        max_elapsed.as_micros().yellow().bold(),
+                        min_elapsed.as_micros().yellow().bold(),
+                        avg_elapsed.as_micros().yellow().bold(),
+                    );
+                } else {
+                    println!(
+                        "{} in {}μs\n",
+                        "Executed".green().bold(),
+                        exec_elapsed.as_micros().yellow().bold(),
+                    );
+                }
                 ready_tx.send(()).unwrap();
             }
             CompileEvent::Error(e) => {
