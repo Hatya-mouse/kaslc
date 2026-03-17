@@ -21,7 +21,7 @@ use std::{
     time::Duration,
 };
 
-pub fn run_target(target_path: &Path, std_path: PathBuf) {
+pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
     // Create a new mpsc channel
     let (tx, rx) = mpsc::channel();
     let (ready_tx, ready_rx) = mpsc::channel::<()>();
@@ -84,21 +84,33 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
         println!();
 
         // Measure the elapsed time of execution
-        let exec_start = std::time::Instant::now();
+        tx.send(CompileEvent::Running).unwrap();
 
         // Run the program with the given inputs
-        if let Err(e) = compiler.run(&inputs, &outputs, &states, 1) {
-            tx.send(CompileEvent::Error(e)).unwrap();
-            return;
+        let mut iter_elapsed = Vec::new();
+        for _ in 0..iterations {
+            let exec_start = std::time::Instant::now();
+            if let Err(e) = compiler.run(&inputs, &outputs, &states, 1) {
+                tx.send(CompileEvent::Error(e)).unwrap();
+                return;
+            }
+            // Measure the elapsed time of execution
+            iter_elapsed.push(exec_start.elapsed());
         }
 
-        // Measure the elapsed time of execution
-        let exec_elapsed = exec_start.elapsed();
-        println!(
-            "{} in {}μs\n",
-            "Executed".yellow().bold(),
-            exec_elapsed.as_micros().yellow().bold()
-        );
+        // Calculate the total elapsed time and average
+        let exec_elapsed = iter_elapsed.iter().fold(Duration::default(), |a, b| a + *b);
+        let max_elapsed = *iter_elapsed.iter().max().unwrap();
+        let min_elapsed = *iter_elapsed.iter().min().unwrap();
+        let avg_elapsed = exec_elapsed / iterations as u32;
+        tx.send(CompileEvent::Finished {
+            exec_elapsed,
+            max_elapsed,
+            min_elapsed,
+            avg_elapsed,
+        })
+        .unwrap();
+        ready_rx.recv().unwrap();
 
         print_outputs(&blueprint, &outputs, &compiler.prog_ctx.type_registry);
 
@@ -125,6 +137,28 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
                     "{} in {:.5}s\n",
                     "Building finished".green().bold(),
                     elapsed.as_secs_f32().yellow().bold()
+                );
+                ready_tx.send(()).unwrap();
+            }
+            CompileEvent::Running => {
+                spinner.set_message("Running...");
+                spinner.enable_steady_tick(Duration::from_millis(80));
+            }
+            CompileEvent::Finished {
+                exec_elapsed,
+                max_elapsed,
+                min_elapsed,
+                avg_elapsed,
+            } => {
+                spinner.finish_and_clear();
+                println!(
+                    "{} {} times in {}μs (max: {}, min: {}, avg: {})\n",
+                    "Executed".green().bold(),
+                    iterations.cyan().bold(),
+                    exec_elapsed.as_micros().yellow().bold(),
+                    max_elapsed.as_micros().yellow().bold(),
+                    min_elapsed.as_micros().yellow().bold(),
+                    avg_elapsed.as_micros().yellow().bold(),
                 );
                 ready_tx.send(()).unwrap();
             }

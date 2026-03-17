@@ -41,7 +41,19 @@ fn main() {
         Subcommands::Run { target_path } => {
             let target_path = Path::new(target_path);
             let std_path = Path::new(&default_std_path);
-            run_target(target_path, std_path.to_path_buf());
+            run_target(target_path, std_path.to_path_buf(), 1);
+        }
+        Subcommands::Bench {
+            target_path,
+            iterations,
+        } => {
+            if iterations < &1 {
+                panic!("Iterations must be greater than 0");
+            }
+
+            let target_path = Path::new(target_path);
+            let std_path = Path::new(&default_std_path);
+            run_target(target_path, std_path.to_path_buf(), *iterations);
         }
         Subcommands::StdPath => {
             println!("Standard library path: {}", default_std_path);

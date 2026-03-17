@@ -4,5 +4,12 @@ pub(super) enum CompileEvent {
     Parsing,
     Building,
     Builded(Duration),
+    Running,
+    Finished {
+        exec_elapsed: Duration,
+        max_elapsed: Duration,
+        min_elapsed: Duration,
+        avg_elapsed: Duration,
+    },
     Error(String),
 }
