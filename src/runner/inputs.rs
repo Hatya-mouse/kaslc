@@ -1,8 +1,9 @@
+use crate::runner::print_utils::get_type_color;
 use kasl::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
-use owo_colors::{AnsiColors, DynColors, OwoColorize};
+use owo_colors::OwoColorize;
 use std::{
     alloc::{Layout, alloc},
     io,
@@ -42,12 +43,14 @@ pub(super) fn ask_for_inputs(
         return Err(InputError::NonPrimitiveInput);
     }
 
+    println!();
+
     let mut parsed_inputs = Vec::new();
     for input in inputs {
         let type_color = get_type_color(&input.value_type);
         let type_string = type_registry.format_type(&input.value_type);
-        print!(
-            "Enter {} input for {}: ",
+        println!(
+            "* Enter {} input for {}: ",
             type_string.color(type_color).bold(),
             input.name.bold()
         );
@@ -116,17 +119,5 @@ fn alloc_for_type<T: Sized>(value: T) -> *mut () {
         let ptr = alloc(layout) as *mut T;
         ptr.write(value);
         ptr as *mut ()
-    }
-}
-
-fn get_type_color(value_type: &ResolvedType) -> DynColors {
-    match value_type {
-        ResolvedType::Primitive(prim_type) => match prim_type {
-            PrimitiveType::Bool => DynColors::Ansi(AnsiColors::Magenta),
-            PrimitiveType::Float => DynColors::Ansi(AnsiColors::Cyan),
-            PrimitiveType::Int => DynColors::Ansi(AnsiColors::Blue),
-            PrimitiveType::Void => DynColors::Ansi(AnsiColors::White),
-        },
-        ResolvedType::Struct(_) => DynColors::Ansi(AnsiColors::Yellow),
     }
 }

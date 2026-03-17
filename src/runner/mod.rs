@@ -2,6 +2,7 @@ mod compile_event;
 mod file_utils;
 mod inputs;
 mod outputs;
+mod print_utils;
 mod ptr_utils;
 
 use compile_event::CompileEvent;

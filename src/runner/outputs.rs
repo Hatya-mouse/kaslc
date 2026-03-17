@@ -16,9 +16,9 @@ fn print_value(
     match value_type {
         ResolvedType::Primitive(prim_type) => unsafe {
             match prim_type {
-                PrimitiveType::Bool => print!("{}", *(ptr as *const bool)),
-                PrimitiveType::Float => print!("{}", *(ptr as *const f32)),
-                PrimitiveType::Int => print!("{}", *(ptr as *const i32)),
+                PrimitiveType::Bool => print!("{}", (*(ptr as *const bool)).magenta()),
+                PrimitiveType::Float => print!("{}", (*(ptr as *const f32)).cyan()),
+                PrimitiveType::Int => print!("{}", (*(ptr as *const i32)).blue()),
                 PrimitiveType::Void => print!("()"),
             }
         },
@@ -33,7 +33,7 @@ fn print_value(
                 .zip(struct_decl.field_offsets.iter())
             {
                 let field_ptr = unsafe { ptr.offset(*offset as isize) };
-                print!("{}    {}: ", prefix, field.name);
+                print!("{}    {}: ", prefix, field.name.bold());
                 print_value(field_ptr, &field.value_type, type_registry, indent + 1);
                 println!();
             }
@@ -50,7 +50,7 @@ pub(super) fn print_outputs(
     println!("{}", " OUTPUTS ".on_green().bold());
 
     for (item, ptr) in blueprint.get_outputs().iter().zip(ptrs.iter()) {
-        print!("{}: ", item.name);
+        print!("{}: ", item.name.bold());
         print_value(*ptr as *const u8, &item.value_type, type_registry, 0);
         println!();
     }
