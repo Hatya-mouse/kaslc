@@ -6,7 +6,7 @@ use kasl::{
 use owo_colors::OwoColorize;
 use std::{
     alloc::{Layout, alloc},
-    io,
+    io::{self, Write, stdout},
     str::FromStr,
 };
 
@@ -49,25 +49,31 @@ pub(super) fn ask_for_inputs(
     for input in inputs {
         let type_color = get_type_color(&input.value_type);
         let type_string = type_registry.format_type(&input.value_type);
-        println!(
+
+        print!(
             "* Enter {} input for {}: ",
             type_string.color(type_color).bold(),
             input.name.bold()
         );
+        stdout().flush().unwrap();
 
+        let str_value;
         match input.value_type {
             ResolvedType::Primitive(prim_type) => match prim_type {
                 PrimitiveType::Bool => {
                     let value = ask_for_bool();
                     parsed_inputs.push(alloc_for_type(value));
+                    str_value = value.to_string();
                 }
                 PrimitiveType::Float => {
                     let value: f32 = ask_for_number();
                     parsed_inputs.push(alloc_for_type(value));
+                    str_value = value.to_string();
                 }
                 PrimitiveType::Int => {
                     let value: i32 = ask_for_number();
                     parsed_inputs.push(alloc_for_type(value));
+                    str_value = value.to_string();
                 }
                 PrimitiveType::Void => {
                     return Err(InputError::VoidInput);
@@ -77,6 +83,14 @@ pub(super) fn ask_for_inputs(
                 unreachable!("This should have been caught by the any() check above")
             }
         }
+
+        print!("\x1b[1A\x1b[2K");
+        println!(
+            "{} {}: {}",
+            "✓".green(),
+            input.name.color(type_color).bold(),
+            str_value
+        );
     }
 
     Ok(parsed_inputs)
@@ -90,10 +104,9 @@ fn ask_for_bool() -> bool {
         io::stdin().read_line(&mut input_str).unwrap();
 
         // Parse the input
-        match input_str.as_str() {
-            "t" => return true,
-            "f" => return false,
-            _ => println!("Invalid input. Please enter a valid boolean."),
+        match input_str.trim().parse::<bool>() {
+            Ok(value) => return value,
+            Err(_) => println!("Invalid input. Please enter a valid boolean."),
         }
     }
 }
@@ -108,7 +121,7 @@ fn ask_for_number<T: FromStr>() -> T {
         // Parse the input
         match input_str.trim().parse::<T>() {
             Ok(value) => return value,
-            Err(_) => println!("Invalid input. Please enter a valid integer."),
+            Err(_) => println!("Invalid input. Please enter a valid number."),
         }
     }
 }
