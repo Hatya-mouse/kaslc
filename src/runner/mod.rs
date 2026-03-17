@@ -54,6 +54,12 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
             }
         };
 
+        // Compile the blueprint
+        if let Err(e) = compiler.compile(&blueprint) {
+            tx.send(CompileEvent::Error(format!("{:#?}", e))).unwrap();
+            return;
+        }
+
         let build_elapsed = build_start.elapsed();
         tx.send(CompileEvent::Builded(build_elapsed)).unwrap();
         ready_rx.recv().unwrap();
@@ -81,7 +87,7 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
         let exec_start = std::time::Instant::now();
 
         // Run the program with the given inputs
-        if let Err(e) = compiler.run(&inputs, &outputs, &states) {
+        if let Err(e) = compiler.run(&inputs, &outputs, &states, 1) {
             tx.send(CompileEvent::Error(e)).unwrap();
             return;
         }
