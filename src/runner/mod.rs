@@ -1,20 +1,23 @@
 mod compile_event;
 mod file_utils;
+mod inputs;
+mod outputs;
+mod ptr_utils;
 
 use compile_event::CompileEvent;
 use indicatif::ProgressBar;
-use kasl::{
-    KaslCompiler,
-    scope_manager::{BlueprintItem, IOBlueprint},
-    type_registry::{PrimitiveType, ResolvedType},
-};
+use kasl::KaslCompiler;
 use std::{
-    alloc::{Layout, alloc, dealloc},
-    io,
     path::{Path, PathBuf},
     sync::mpsc,
     thread,
     time::Duration,
+};
+
+use crate::runner::{
+    inputs::{InputError, ask_for_inputs},
+    outputs::print_outputs,
+    ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
 };
 
 pub fn run_target(target_path: &Path, std_path: PathBuf) {
@@ -60,17 +63,16 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
                 }
             },
         };
-        let (outputs, output_layouts) = get_blueprint_ptr(blueprint.get_outputs());
-        let (states, state_layouts) = get_blueprint_ptr(blueprint.get_states());
+        let outputs = get_blueprint_ptr(blueprint.get_outputs());
+        let states = get_blueprint_ptr(blueprint.get_states());
 
         // Run the program with the given inputs
         compiler.run(&blueprint, &inputs, &outputs, &states);
 
-        println!("Outputs: {:?}", outputs);
-        println!("States: {:?}", states);
+        print_outputs(&blueprint, &outputs, &compiler.prog_ctx.type_registry);
 
-        deallocate_blueprint_ptr(outputs, output_layouts);
-        deallocate_blueprint_ptr(states, state_layouts);
+        deallocate_blueprint_ptr(blueprint.get_outputs(), outputs);
+        deallocate_blueprint_ptr(blueprint.get_states(), states);
     });
 
     for event in rx {
@@ -87,133 +89,6 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
             }
             CompileEvent::Error(e) => {
                 eprintln!("Error: {}", e);
-            }
-        }
-    }
-}
-
-enum InputError {
-    /// Non-primitive input type is not supported on kaslc.
-    NonPrimitiveInput,
-    /// Void input type is not allowed.
-    VoidInput,
-}
-
-fn ask_for_inputs(blueprint: &IOBlueprint) -> Result<Vec<*mut ()>, InputError> {
-    let inputs = blueprint.get_inputs();
-
-    // If the input has non-primitive type, warn user and skip asking for input
-    if inputs
-        .iter()
-        .any(|input| matches!(input.value_type, ResolvedType::Struct(_)))
-    {
-        return Err(InputError::NonPrimitiveInput);
-    }
-
-    let mut parsed_inputs = Vec::new();
-    for (index, input) in inputs.iter().enumerate() {
-        match input.value_type {
-            ResolvedType::Primitive(prim_type) => match prim_type {
-                PrimitiveType::Bool => {
-                    let mut value = ask_for_bool(index);
-                    parsed_inputs.push(&mut value as *mut bool as *mut ());
-                }
-                PrimitiveType::Float => {
-                    let mut value = ask_for_float(index);
-                    parsed_inputs.push(&mut value as *mut f32 as *mut ());
-                }
-                PrimitiveType::Int => {
-                    let mut value = ask_for_int(index);
-                    parsed_inputs.push(&mut value as *mut i32 as *mut ());
-                }
-                PrimitiveType::Void => {
-                    return Err(InputError::VoidInput);
-                }
-            },
-            ResolvedType::Struct(_) => {
-                unreachable!("This should have been caught by the any() check above")
-            }
-        }
-    }
-
-    Ok(parsed_inputs)
-}
-
-fn ask_for_bool(index: usize) -> bool {
-    loop {
-        let mut input_str = String::new();
-
-        // Read the user'a input
-        println!("Enter Bool input for the input #{}", index);
-        io::stdin().read_line(&mut input_str).unwrap();
-
-        // Parse the input
-        match input_str.as_str() {
-            "t" => return true,
-            "f" => return false,
-            _ => println!("Invalid input. Please enter a valid boolean."),
-        }
-    }
-}
-
-fn ask_for_float(index: usize) -> f32 {
-    loop {
-        let mut input_str = String::new();
-
-        // Read the user'a input
-        println!("Enter Float input for the input #{}", index);
-        io::stdin().read_line(&mut input_str).unwrap();
-
-        // Parse the input
-        match input_str.trim().parse::<f32>() {
-            Ok(value) => return value,
-            Err(_) => println!("Invalid input. Please enter a valid float."),
-        }
-    }
-}
-
-fn ask_for_int(index: usize) -> i32 {
-    loop {
-        let mut input_str = String::new();
-
-        // Read the user'a input
-        println!("Enter Int input for the input #{}", index);
-        io::stdin().read_line(&mut input_str).unwrap();
-
-        // Parse the input
-        match input_str.trim().parse::<i32>() {
-            Ok(value) => return value,
-            Err(_) => println!("Invalid input. Please enter a valid integer."),
-        }
-    }
-}
-
-fn get_blueprint_ptr(items: &[BlueprintItem]) -> (Vec<*mut ()>, Vec<Layout>) {
-    let mut ptrs: Vec<*mut ()> = Vec::with_capacity(items.len());
-    let mut layouts: Vec<Layout> = Vec::with_capacity(items.len());
-    for item in items {
-        let layout = Layout::from_size_align(item.size, item.align as usize).unwrap();
-
-        unsafe {
-            let ptr: *mut u8 = alloc(layout);
-
-            if ptr.is_null() {
-                panic!("Failed to allocate memory for blueprint item");
-            }
-
-            let void_ptr = ptr as *mut ();
-            ptrs.push(void_ptr);
-            layouts.push(layout);
-        }
-    }
-    (ptrs, layouts)
-}
-
-fn deallocate_blueprint_ptr(ptrs: Vec<*mut ()>, layouts: Vec<Layout>) {
-    unsafe {
-        for (ptr, layout) in ptrs.iter().zip(layouts) {
-            if !ptr.is_null() {
-                dealloc(*ptr as *mut u8, layout);
             }
         }
     }
