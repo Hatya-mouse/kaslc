@@ -1,9 +1,10 @@
 mod cli;
+mod print_err;
 mod runner;
 mod std_installer;
 mod subcommands;
 
-use crate::{runner::run_target, std_installer::install_std};
+use crate::{print_err::print_err, runner::run_target, std_installer::install_std};
 use clap::Parser;
 use cli::Cli;
 use rust_embed::RustEmbed;
@@ -28,7 +29,8 @@ fn main() {
                 }
                 default_path.to_string_lossy().into_owned()
             } else {
-                panic!("Could not determine home directory for default KASL_STD_PATH");
+                print_err("Could not determine home directory for default KASL_STD_PATH");
+                return;
             }
         }
     };
@@ -48,7 +50,8 @@ fn main() {
             iterations,
         } => {
             if iterations < &1 {
-                panic!("Iterations must be greater than 0");
+                print_err("Iterations must be greater than 0");
+                return;
             }
 
             let target_path = Path::new(target_path);

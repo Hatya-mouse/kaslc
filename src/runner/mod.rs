@@ -5,10 +5,13 @@ mod outputs;
 mod print_utils;
 mod ptr_utils;
 
-use crate::runner::{
-    inputs::{InputError, ask_for_inputs},
-    outputs::print_outputs,
-    ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
+use crate::{
+    print_err::print_err,
+    runner::{
+        inputs::{InputError, ask_for_inputs},
+        outputs::print_outputs,
+        ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
+    },
 };
 use compile_event::CompileEvent;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -26,7 +29,13 @@ pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
     let (tx, rx) = mpsc::channel();
     let (ready_tx, ready_rx) = mpsc::channel::<()>();
     // Get the file contents
-    let code = file_utils::get_file_contents(target_path).unwrap();
+    let code = match file_utils::get_file_contents(target_path) {
+        Ok(code) => code,
+        Err(e) => {
+            print_err(e);
+            return;
+        }
+    };
 
     // Create a compiler thread
     thread::spawn(move || {
@@ -69,11 +78,11 @@ pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
             Ok(inputs) => inputs,
             Err(e) => match e {
                 InputError::NonPrimitiveInput => {
-                    eprintln!("Error: Non-primitive input type is not supported on kaslc.");
+                    print_err("Error: Non-primitive input type is not supported on kaslc.");
                     return;
                 }
                 InputError::VoidInput => {
-                    eprintln!("Error: Void input type is not allowed.");
+                    print_err("Void input type is not allowed.");
                     return;
                 }
             },
@@ -171,8 +180,7 @@ pub fn run_target(target_path: &Path, std_path: PathBuf, iterations: usize) {
                 ready_tx.send(()).unwrap();
             }
             CompileEvent::Error(e) => {
-                eprintln!("{}", " ERROR ".on_red().bold());
-                eprintln!("{}", e);
+                print_err(e);
             }
         }
     }
