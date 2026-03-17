@@ -5,20 +5,20 @@ mod outputs;
 mod print_utils;
 mod ptr_utils;
 
+use crate::runner::{
+    inputs::{InputError, ask_for_inputs},
+    outputs::print_outputs,
+    ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
+};
 use compile_event::CompileEvent;
 use indicatif::ProgressBar;
 use kasl::KaslCompiler;
+use owo_colors::OwoColorize;
 use std::{
     path::{Path, PathBuf},
     sync::mpsc,
     thread,
     time::Duration,
-};
-
-use crate::runner::{
-    inputs::{InputError, ask_for_inputs},
-    outputs::print_outputs,
-    ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
 };
 
 pub fn run_target(target_path: &Path, std_path: PathBuf) {
@@ -68,7 +68,10 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
         let states = get_blueprint_ptr(blueprint.get_states());
 
         // Run the program with the given inputs
-        compiler.run(&blueprint, &inputs, &outputs, &states);
+        if let Err(e) = compiler.run(&blueprint, &inputs, &outputs, &states) {
+            tx.send(CompileEvent::Error(e)).unwrap();
+            return;
+        }
 
         println!();
         print_outputs(&blueprint, &outputs, &compiler.prog_ctx.type_registry);
@@ -90,7 +93,8 @@ pub fn run_target(target_path: &Path, std_path: PathBuf) {
                 spinner.enable_steady_tick(Duration::from_millis(80));
             }
             CompileEvent::Error(e) => {
-                eprintln!("Error: {}", e);
+                eprintln!("{}", " ERROR ".on_red().bold());
+                eprintln!("{}", e);
             }
         }
     }
