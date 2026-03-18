@@ -1,12 +1,11 @@
-use crate::runner::print_utils::get_type_color;
+use crate::runner::input_ui::{print_entered_input, print_inputs, prompt_input};
 use kasl::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
-use owo_colors::OwoColorize;
 use std::{
     alloc::{Layout, alloc},
-    io::{self, Write, stdout},
+    io::{self},
     str::FromStr,
 };
 
@@ -24,16 +23,7 @@ pub(super) fn ask_for_inputs(
     let inputs = blueprint.get_inputs();
 
     // Print the list of inputs first
-    println!("{}", " INPUTS ".on_red().bold());
-    for input in inputs {
-        let type_color = get_type_color(&input.value_type);
-        let type_string = type_registry.format_type(&input.value_type);
-        println!(
-            "{}: {}",
-            input.name.bold(),
-            type_string.color(type_color).bold()
-        );
-    }
+    print_inputs(inputs, type_registry);
 
     // If the input has non-primitive type, warn user and skip asking for input
     if inputs
@@ -47,15 +37,7 @@ pub(super) fn ask_for_inputs(
 
     let mut parsed_inputs = Vec::new();
     for input in inputs {
-        let type_color = get_type_color(&input.value_type);
-        let type_string = type_registry.format_type(&input.value_type);
-
-        print!(
-            "* Enter {} input for {}: ",
-            type_string.color(type_color).bold(),
-            input.name.bold()
-        );
-        stdout().flush().unwrap();
+        prompt_input(input, type_registry);
 
         let str_value;
         match input.value_type {
@@ -84,13 +66,7 @@ pub(super) fn ask_for_inputs(
             }
         }
 
-        print!("\x1b[1A\x1b[2K");
-        println!(
-            "{} {}: {}",
-            "✓".green(),
-            input.name.color(type_color).bold(),
-            str_value
-        );
+        print_entered_input(input, &str_value);
     }
 
     Ok(parsed_inputs)
