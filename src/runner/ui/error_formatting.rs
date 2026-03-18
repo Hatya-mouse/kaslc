@@ -9,28 +9,28 @@ pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, prefe
     // Show all occurrences of the error in the code
     let mut sorted_ranges: Vec<Range> = record.ranges.iter().cloned().collect();
     sorted_ranges.sort();
-    for (index, range) in sorted_ranges.iter().enumerate() {
-        println!(
-            "{} {}:{}",
-            "-->".bright_blue().bold(),
-            file_path,
-            format_offset(source, range.start)
-        );
-        indicate_source_loc(source, *range);
-
-        if index < sorted_ranges.len() - 1 {
-            println!();
-        }
+    for range in sorted_ranges {
+        indicate_source_loc(source, range, file_path);
     }
 }
 
-fn indicate_source_loc(source: &str, range: Range) {
+fn indicate_source_loc(source: &str, range: Range, file_path: &str) {
     // Get the start and end line/col positions
     let (start_line, start_col) = offset_to_line_col(source, range.start);
     let (end_line, end_col) = offset_to_line_col(source, range.end);
 
     // Get the max line number width
     let max_line_width = start_line.to_string().len().max(end_line.to_string().len());
+
+    // Print the file path and start line/col
+    println!(
+        "{}{} {}:{}:{}",
+        " ".repeat(max_line_width),
+        "-->".bright_blue().bold(),
+        file_path,
+        start_line,
+        start_col
+    );
 
     // Get the lines between the start and end positions
     let lines: Vec<&str> = source.lines().collect();
@@ -66,11 +66,6 @@ fn indicate_single_line(
         underline.red(),
         width = line_num_width
     );
-}
-
-fn format_offset(source: &str, offset: usize) -> String {
-    let line_col = offset_to_line_col(source, offset);
-    format!("{}:{}", line_col.0, line_col.1)
 }
 
 fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {
