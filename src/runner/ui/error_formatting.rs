@@ -5,7 +5,12 @@ use owo_colors::OwoColorize;
 pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, preferred_lang: &str) {
     // Show the error message
     let localized_error = format_error(record, preferred_lang);
-    println!("* {}: {}", "Error".red().bold(), localized_error.bold());
+    println!(
+        "* {} [{}]: {}",
+        "Error".red().bold(),
+        record.key.kind,
+        localized_error.bold()
+    );
 
     // Show all occurrences of the error in the code
     let mut sorted_ranges: Vec<Range> = record.ranges.iter().cloned().collect();
