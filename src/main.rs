@@ -1,4 +1,5 @@
 mod cli;
+mod highlighter;
 mod print_err;
 mod runner;
 mod std_installer;

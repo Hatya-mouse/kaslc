@@ -1,3 +1,4 @@
+use crate::highlighter::highlight;
 use kasl::{Range, error::ErrorRecord, localization::format_error};
 use owo_colors::OwoColorize;
 
@@ -61,7 +62,7 @@ fn indicate_single_line(
     println!(
         "{:>width$} | {}\n{} | {}",
         line_num.blue().bold(),
-        line,
+        highlight(line),
         " ".repeat(line_num_width),
         underline.red(),
         width = line_num_width
