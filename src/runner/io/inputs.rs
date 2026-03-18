@@ -1,6 +1,6 @@
 use crate::runner::{
     compiler::ptr_utils::alloc_for_type,
-    ui::input_ui::{print_entered_input, print_inputs, prompt_input},
+    ui::input_ui::{print_entered_input, print_input_header, print_inputs, prompt_input},
 };
 use kasl::{
     scope_manager::IOBlueprint,
@@ -37,6 +37,7 @@ pub fn ask_for_inputs(
     let inputs = blueprint.get_inputs();
 
     // Print the list of inputs first
+    print_input_header();
     print_inputs(inputs, type_registry);
 
     // If the input has non-primitive type, warn user and skip asking for input

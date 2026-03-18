@@ -3,8 +3,11 @@ use kasl::{scope_manager::BlueprintItem, type_registry::TypeRegistry};
 use owo_colors::OwoColorize;
 use std::io::{Write, stdout};
 
+pub fn print_input_header() {
+    println!("{}", " INPUTS ".on_blue().bold());
+}
+
 pub fn print_inputs(inputs: &[BlueprintItem], type_registry: &TypeRegistry) {
-    println!("{}", " INPUTS ".on_red().bold());
     for input in inputs {
         let type_color = get_type_color(&input.value_type);
         let type_string = type_registry.format_type(&input.value_type);

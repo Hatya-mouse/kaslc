@@ -1,7 +1,7 @@
 use crate::runner::{
     compiler::ptr_utils::alloc_for_type,
     file_utils::{FileLoadError, get_file_contents},
-    ui::input_ui::print_entered_input,
+    ui::input_ui::{print_entered_input, print_input_header},
 };
 use kasl::{
     scope_manager::IOBlueprint,
@@ -45,6 +45,8 @@ pub fn load_inputs_from_toml(
     let table: HashMap<String, toml::Value> =
         toml::from_str(&content).map_err(|err| TomlLoadError::ParseError(err.to_string()))?;
     let mut ptrs = Vec::new();
+
+    print_input_header();
 
     for input in blueprint.get_inputs() {
         let raw_val = table
