@@ -1,4 +1,4 @@
-use crate::runner::input_ui::{print_entered_input, print_inputs, prompt_input};
+use crate::runner::ui::input_ui::{print_entered_input, print_inputs, prompt_input};
 use kasl::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
@@ -9,14 +9,14 @@ use std::{
     str::FromStr,
 };
 
-pub(super) enum InputError {
+pub enum InputError {
     /// Non-primitive input type is not supported on kaslc.
     NonPrimitiveInput,
     /// Void input type is not allowed.
     VoidInput,
 }
 
-pub(super) fn ask_for_inputs(
+pub fn ask_for_inputs(
     blueprint: &IOBlueprint,
     type_registry: &TypeRegistry,
 ) -> Result<Vec<*mut ()>, InputError> {

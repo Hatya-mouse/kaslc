@@ -1,4 +1,4 @@
-use crate::runner::print_utils::get_type_color;
+use crate::runner::ui::print_utils::get_type_color;
 use kasl::{scope_manager::BlueprintItem, type_registry::TypeRegistry};
 use owo_colors::OwoColorize;
 use std::io::{Write, stdout};
