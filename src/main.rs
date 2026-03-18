@@ -40,26 +40,15 @@ fn main() {
             let copy_path = Path::new(std_path.as_ref().unwrap_or(&default_std_path));
             install_std(copy_path).unwrap();
         }
-        Subcommands::Run {
-            target_path,
-            input,
-            output,
-        } => {
+        Subcommands::Run { target_path, input } => {
             let target_path = Path::new(target_path);
             let std_path = Path::new(&default_std_path);
-            run_target(
-                target_path,
-                std_path.to_path_buf(),
-                1,
-                input.as_ref(),
-                output.as_ref(),
-            );
+            run_target(target_path, std_path.to_path_buf(), 1, input.as_ref());
         }
         Subcommands::Bench {
             target_path,
             iterations,
             input,
-            output,
         } => {
             if iterations < &1 {
                 print_err("Iterations must be greater than 0");
@@ -73,7 +62,6 @@ fn main() {
                 std_path.to_path_buf(),
                 *iterations,
                 input.as_ref(),
-                output.as_ref(),
             );
         }
         Subcommands::StdPath => {

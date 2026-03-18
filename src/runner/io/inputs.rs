@@ -1,10 +1,13 @@
-use crate::runner::ui::input_ui::{print_entered_input, print_inputs, prompt_input};
+use crate::runner::{
+    compiler::ptr_utils::alloc_for_type,
+    ui::input_ui::{print_entered_input, print_inputs, prompt_input},
+};
 use kasl::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
 use std::{
-    alloc::{Layout, alloc},
+    fmt::{Display, Formatter},
     io::{self},
     str::FromStr,
 };
@@ -14,6 +17,17 @@ pub enum InputError {
     NonPrimitiveInput,
     /// Void input type is not allowed.
     VoidInput,
+}
+
+impl Display for InputError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            InputError::NonPrimitiveInput => {
+                write!(f, "Non-primitive input type is not supported on kaslc.")
+            }
+            InputError::VoidInput => write!(f, "Void input type is not allowed."),
+        }
+    }
 }
 
 pub fn ask_for_inputs(
@@ -66,6 +80,7 @@ pub fn ask_for_inputs(
             }
         }
 
+        print!("\x1b[1A\x1b[2K");
         print_entered_input(input, &str_value);
     }
 
@@ -99,14 +114,5 @@ fn ask_for_number<T: FromStr>() -> T {
             Ok(value) => return value,
             Err(_) => println!("Invalid input. Please enter a valid number."),
         }
-    }
-}
-
-fn alloc_for_type<T: Sized>(value: T) -> *mut () {
-    let layout = Layout::new::<T>();
-    unsafe {
-        let ptr = alloc(layout) as *mut T;
-        ptr.write(value);
-        ptr as *mut ()
     }
 }

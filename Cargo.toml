@@ -10,3 +10,4 @@ indicatif = "0.18.4"
 kasl = { git = "https://github.com/hatya-mouse/kasl", branch = "main" }
 owo-colors = "4.3.0"
 rust-embed = "8.11.0"
+toml = "1.0.7"

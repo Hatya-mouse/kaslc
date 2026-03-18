@@ -31,7 +31,6 @@ pub fn prompt_input(input: &BlueprintItem, type_registry: &TypeRegistry) {
 pub fn print_entered_input(input: &BlueprintItem, str_value: &str) {
     let type_color = get_type_color(&input.value_type);
 
-    print!("\x1b[1A\x1b[2K");
     println!(
         "{} {}: {}",
         "✓".green(),

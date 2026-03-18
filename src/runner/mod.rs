@@ -18,7 +18,6 @@ pub fn run_target(
     std_path: PathBuf,
     iterations: usize,
     input_file: Option<&String>,
-    output_file: Option<&String>,
 ) {
     // Create a new mpsc channel
     let (tx, rx) = mpsc::channel();
@@ -33,6 +32,7 @@ pub fn run_target(
     };
 
     // Create a compiler thread
-    compiler::spawn_compiler_thread(std_path, code, iterations, tx, ready_rx);
+    let input_path = input_file.map(PathBuf::from);
+    compiler::spawn_compiler_thread(std_path, input_path, code, iterations, tx, ready_rx);
     run_event_loop(iterations, rx, ready_tx);
 }

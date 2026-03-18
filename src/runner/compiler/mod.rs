@@ -1,14 +1,11 @@
-mod ptr_utils;
+pub(super) mod ptr_utils;
 
 use crate::{
     print_err::print_err,
     runner::{
         CompileEvent,
         compiler::ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
-        io::{
-            inputs::{InputError, ask_for_inputs},
-            outputs::print_outputs,
-        },
+        io::{inputs::ask_for_inputs, outputs::print_outputs, toml_io::load_inputs_from_toml},
     },
 };
 use kasl::KaslCompiler;
@@ -16,6 +13,7 @@ use std::{path::PathBuf, sync::mpsc, thread, time::Duration};
 
 pub(super) fn spawn_compiler_thread(
     std_path: PathBuf,
+    input_path: Option<PathBuf>,
     code: String,
     iterations: usize,
     tx: mpsc::Sender<CompileEvent>,
@@ -56,20 +54,26 @@ pub(super) fn spawn_compiler_thread(
         tx.send(CompileEvent::Builded(build_elapsed)).unwrap();
         ready_rx.recv().unwrap();
 
-        // Ask for inputs
-        let inputs = match ask_for_inputs(&blueprint, &compiler.prog_ctx.type_registry) {
-            Ok(inputs) => inputs,
-            Err(e) => match e {
-                InputError::NonPrimitiveInput => {
-                    print_err("Error: Non-primitive input type is not supported on kaslc.");
+        // If the input path is set, get the inputs from the file
+        let inputs = if let Some(input_path) = input_path {
+            match load_inputs_from_toml(&blueprint, &input_path) {
+                Ok(inputs) => inputs,
+                Err(e) => {
+                    print_err(e);
                     return;
                 }
-                InputError::VoidInput => {
-                    print_err("Void input type is not allowed.");
+            }
+        } else {
+            // Ask for inputs
+            match ask_for_inputs(&blueprint, &compiler.prog_ctx.type_registry) {
+                Ok(inputs) => inputs,
+                Err(e) => {
+                    print_err(e);
                     return;
                 }
-            },
+            }
         };
+
         let outputs = get_blueprint_ptr(blueprint.get_outputs());
         let states = get_blueprint_ptr(blueprint.get_states());
 

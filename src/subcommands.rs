@@ -15,11 +15,11 @@ pub enum Subcommands {
         /// Path to the target KASL file to run.
         target_path: String,
         /// Path to the file to load as input.
-        #[arg(long, short)]
+        #[arg(long)]
         input: Option<String>,
-        /// Path to the file to write output to.
-        #[arg(long, short)]
-        output: Option<String>,
+        // Path to the file to write output to.
+        // #[arg(long)]
+        // output: Option<String>,
     },
 
     /// Runs a target KASL files multiple times, and calculate min/max/average execution time and the standard deviation.
@@ -32,9 +32,9 @@ pub enum Subcommands {
         /// Path to the file to load as input.
         #[arg(long)]
         input: Option<String>,
-        /// Path to the file to write output to.
-        #[arg(long)]
-        output: Option<String>,
+        // Path to the file to write output to.
+        // #[arg(long)]
+        // output: Option<String>,
     },
 
     /// Prints the path to the standard library.

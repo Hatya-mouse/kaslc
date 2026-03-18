@@ -31,3 +31,12 @@ pub(super) fn deallocate_blueprint_ptr(items: &[BlueprintItem], ptrs: Vec<*mut (
         }
     }
 }
+
+pub fn alloc_for_type<T: Sized>(value: T) -> *mut () {
+    let layout = Layout::new::<T>();
+    unsafe {
+        let ptr = alloc(layout) as *mut T;
+        ptr.write(value);
+        ptr as *mut ()
+    }
+}
