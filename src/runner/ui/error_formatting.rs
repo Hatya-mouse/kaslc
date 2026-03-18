@@ -39,11 +39,11 @@ fn indicate_source_loc(source: &str, range: Range, file_path: &str) {
             if line_number == start_line && line_number == end_line {
                 indicate_single_line(max_line_width, line_number, line, start_col, end_col);
             } else if line_number == start_line {
-                indicate_single_line(max_line_width, line_number, line, start_col, line.len());
+                indicate_single_line(max_line_width, line_number, line, start_col, line.len() + 1);
             } else if line_number == end_line {
-                indicate_single_line(max_line_width, line_number, line, 0, end_col);
+                indicate_single_line(max_line_width, line_number, line, 1, end_col);
             } else {
-                indicate_single_line(max_line_width, line_number, line, 0, line.len());
+                indicate_single_line(max_line_width, line_number, line, 1, line.len() + 1);
             }
         }
     }
