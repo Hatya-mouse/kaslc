@@ -68,6 +68,7 @@ pub fn run_event_loop(
             CompileEvent::KaslError(errors, source) => {
                 spinner.finish_and_clear();
                 print_err_header();
+                println!("{} errors", errors.len().bold());
                 for record in errors {
                     indicate_error(&record, file_path, &source, &preferred_lang);
                 }
