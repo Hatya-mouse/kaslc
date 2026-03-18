@@ -66,12 +66,14 @@ pub fn run_event_loop(
                 ready_tx.send(()).unwrap();
             }
             CompileEvent::KaslError(errors, source) => {
+                spinner.finish_and_clear();
                 print_err_header();
                 for record in errors {
                     indicate_error(&record, file_path, &source, &preferred_lang);
                 }
             }
             CompileEvent::Error(e) => {
+                spinner.finish_and_clear();
                 print_err(e);
             }
         }

@@ -2,6 +2,10 @@ use kasl::{Range, error::ErrorRecord, localization::format_error};
 use owo_colors::OwoColorize;
 
 pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, preferred_lang: &str) {
+    // Show the error message
+    let localized_error = format_error(record, preferred_lang);
+    println!("{}: {}", "Error".red().bold(), localized_error.bold());
+
     // Show all occurrences of the error in the code
     let mut sorted_ranges: Vec<Range> = record.ranges.iter().cloned().collect();
     sorted_ranges.sort();
@@ -12,10 +16,6 @@ pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, prefe
         // Print a blank line between ranges
         println!();
     }
-
-    // Show the error message
-    let localized_error = format_error(record, preferred_lang);
-    println!("{}", localized_error.bold());
 }
 
 fn indicate_source_loc(source: &str, range: Range) {
