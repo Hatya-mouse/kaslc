@@ -27,10 +27,10 @@ pub fn install_std(dest: &Path) -> io::Result<()> {
         pb.inc(1);
     }
 
-    pb.finish_with_message("Done".green().bold().to_string());
+    pb.finish_with_message("Done".bright_green().bold().to_string());
     println!(
         "{} Installed std to {}",
-        "✓".green().bold(),
+        "✓".bright_green().bold(),
         dest.display().to_string().bold()
     );
 

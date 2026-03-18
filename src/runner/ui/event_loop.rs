@@ -30,7 +30,7 @@ pub fn run_event_loop(
                 spinner.finish_and_clear();
                 println!(
                     "{} in {:.5}s\n",
-                    "Building finished".green().bold(),
+                    "Building finished".bright_green().bold(),
                     elapsed.as_secs_f32().yellow().bold()
                 );
                 ready_tx.send(()).unwrap();
@@ -49,7 +49,7 @@ pub fn run_event_loop(
                 if iterations > 1 {
                     println!(
                         "{} {} times in {}μs (max: {}ns, min: {}ns, avg: {}ns)\n",
-                        "Executed".green().bold(),
+                        "Executed".bright_green().bold(),
                         iterations.cyan().bold(),
                         exec_elapsed.as_micros().yellow().bold(),
                         max_elapsed.as_nanos().yellow().bold(),
@@ -59,7 +59,7 @@ pub fn run_event_loop(
                 } else {
                     println!(
                         "{} in {}μs\n",
-                        "Executed".green().bold(),
+                        "Executed".bright_green().bold(),
                         exec_elapsed.as_micros().yellow().bold(),
                     );
                 }

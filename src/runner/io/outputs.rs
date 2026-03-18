@@ -43,7 +43,7 @@ fn print_value(
 }
 
 pub fn print_outputs(blueprint: &IOBlueprint, ptrs: &[*mut ()], type_registry: &TypeRegistry) {
-    println!("{}", " OUTPUTS ".on_green().bold());
+    println!("{}", " OUTPUTS ".on_bright_green().bold());
 
     for (item, ptr) in blueprint.get_outputs().iter().zip(ptrs.iter()) {
         print!("{}: ", item.name.bold());

@@ -36,7 +36,7 @@ pub fn print_entered_input(input: &BlueprintItem, str_value: &str) {
 
     println!(
         "{} {}: {}",
-        "✓".green(),
+        "✓".bright_green(),
         input.name.color(type_color).bold(),
         str_value
     );

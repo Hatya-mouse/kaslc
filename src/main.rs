@@ -7,6 +7,7 @@ mod subcommands;
 use crate::{print_err::print_err, runner::run_target, std_installer::install_std};
 use clap::Parser;
 use cli::Cli;
+use owo_colors::OwoColorize;
 use rust_embed::RustEmbed;
 use std::{env, path::Path};
 use subcommands::Subcommands;
@@ -81,7 +82,11 @@ fn main() {
             );
         }
         Subcommands::StdPath => {
-            println!("Standard library path: {}", default_std_path);
+            println!(
+                "Path to {}: {}",
+                "std".bright_green().bold(),
+                default_std_path
+            );
         }
     }
 }
