@@ -1,12 +1,17 @@
-use crate::{print_err::print_err, runner::CompileEvent};
+use crate::{
+    print_err::{print_err, print_err_header},
+    runner::{CompileEvent, ui::error_formatting::indicate_error},
+};
 use indicatif::{ProgressBar, ProgressStyle};
 use owo_colors::OwoColorize;
 use std::{sync::mpsc, time::Duration};
 
 pub fn run_event_loop(
     iterations: usize,
+    file_path: &str,
     rx: mpsc::Receiver<CompileEvent>,
     ready_tx: mpsc::Sender<()>,
+    preferred_lang: String,
 ) {
     let spinner = ProgressBar::new_spinner();
     spinner.set_style(ProgressStyle::with_template("{spinner} {msg}").unwrap());
@@ -59,6 +64,12 @@ pub fn run_event_loop(
                     );
                 }
                 ready_tx.send(()).unwrap();
+            }
+            CompileEvent::KaslError(errors, source) => {
+                print_err_header();
+                for record in errors {
+                    indicate_error(&record, file_path, &source, &preferred_lang);
+                }
             }
             CompileEvent::Error(e) => {
                 print_err(e);

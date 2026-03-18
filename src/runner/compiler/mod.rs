@@ -30,7 +30,7 @@ pub(super) fn spawn_compiler_thread(
         // Notify the main thread that parsing has started
         tx.send(CompileEvent::Parsing).unwrap();
         if let Err(e) = compiler.parse(&code) {
-            tx.send(CompileEvent::Error(e.to_string())).unwrap();
+            tx.send(CompileEvent::KaslError(vec![*e], code)).unwrap();
             return;
         }
 
@@ -39,14 +39,14 @@ pub(super) fn spawn_compiler_thread(
         let blueprint = match compiler.build() {
             Ok(blueprint) => blueprint,
             Err(e) => {
-                tx.send(CompileEvent::Error(format!("{:#?}", e))).unwrap();
+                tx.send(CompileEvent::KaslError(e, code)).unwrap();
                 return;
             }
         };
 
         // Compile the blueprint
         if let Err(e) = compiler.compile(&blueprint) {
-            tx.send(CompileEvent::Error(format!("{:#?}", e))).unwrap();
+            tx.send(CompileEvent::KaslError(e, code)).unwrap();
             return;
         }
 

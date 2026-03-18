@@ -18,6 +18,15 @@ struct StdLib;
 fn main() {
     let cli = Cli::parse();
 
+    let preferred_lang = cli.lang.unwrap_or_else(|| {
+        std::env::var("LANG")
+            .unwrap_or_default()
+            .split('_')
+            .next()
+            .unwrap_or("en")
+            .to_string()
+    });
+
     // Get the KASL_STD_PATH environment variable, or set a default path
     let default_std_path = match env::var("KASL_STD_PATH") {
         Ok(value) => value,
@@ -43,7 +52,13 @@ fn main() {
         Subcommands::Run { target_path, input } => {
             let target_path = Path::new(target_path);
             let std_path = Path::new(&default_std_path);
-            run_target(target_path, std_path.to_path_buf(), 1, input.as_ref());
+            run_target(
+                target_path,
+                std_path.to_path_buf(),
+                1,
+                input.as_ref(),
+                preferred_lang,
+            );
         }
         Subcommands::Bench {
             target_path,
@@ -62,6 +77,7 @@ fn main() {
                 std_path.to_path_buf(),
                 *iterations,
                 input.as_ref(),
+                preferred_lang,
             );
         }
         Subcommands::StdPath => {

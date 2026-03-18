@@ -6,4 +6,7 @@ use clap::Parser;
 pub struct Cli {
     #[command(subcommand)]
     pub command: Subcommands,
+
+    #[arg(long)]
+    pub lang: Option<String>,
 }

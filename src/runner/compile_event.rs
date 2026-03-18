@@ -1,3 +1,4 @@
+use kasl::error::ErrorRecord;
 use std::time::Duration;
 
 pub(super) enum CompileEvent {
@@ -12,4 +13,5 @@ pub(super) enum CompileEvent {
         avg_elapsed: Duration,
     },
     Error(String),
+    KaslError(Vec<ErrorRecord>, String),
 }
