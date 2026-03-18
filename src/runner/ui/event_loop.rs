@@ -67,10 +67,14 @@ pub fn run_event_loop(
             }
             CompileEvent::KaslError(errors, source) => {
                 spinner.finish_and_clear();
-                print_err_header();
-                println!("{} errors", errors.len().bold());
-                for record in errors {
-                    indicate_error(&record, file_path, &source, &preferred_lang);
+                print_err_header(Some(&format!("{} errors", errors.len().bold())));
+                println!();
+                for (index, record) in errors.iter().enumerate() {
+                    indicate_error(record, file_path, &source, &preferred_lang);
+
+                    if index < errors.len() - 1 {
+                        println!();
+                    }
                 }
             }
             CompileEvent::Error(e) => {

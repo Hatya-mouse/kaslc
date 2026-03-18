@@ -4,17 +4,23 @@ use owo_colors::OwoColorize;
 pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, preferred_lang: &str) {
     // Show the error message
     let localized_error = format_error(record, preferred_lang);
-    println!("{}: {}", "Error".red().bold(), localized_error.bold());
+    println!("* {}: {}", "Error".red().bold(), localized_error.bold());
 
     // Show all occurrences of the error in the code
     let mut sorted_ranges: Vec<Range> = record.ranges.iter().cloned().collect();
     sorted_ranges.sort();
-    for range in sorted_ranges.iter() {
-        println!("* {}:{}", file_path, format_offset(source, range.start));
+    for (index, range) in sorted_ranges.iter().enumerate() {
+        println!(
+            "{} {}:{}",
+            "-->".bright_blue().bold(),
+            file_path,
+            format_offset(source, range.start)
+        );
         indicate_source_loc(source, *range);
 
-        // Print a blank line between ranges
-        println!();
+        if index < sorted_ranges.len() - 1 {
+            println!();
+        }
     }
 }
 
@@ -53,7 +59,7 @@ fn indicate_single_line(
     let underline_len = (end_col - start_col).max(1);
     let underline = " ".repeat(start_col - 1) + &"^".repeat(underline_len);
     println!(
-        "{:>width$} | {}\n{} | {}\n",
+        "{:>width$} | {}\n{} | {}",
         line_num.blue().bold(),
         line,
         " ".repeat(line_num_width),
