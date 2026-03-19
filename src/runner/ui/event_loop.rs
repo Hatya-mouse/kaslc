@@ -41,19 +41,15 @@ pub fn run_event_loop(
             }
             CompileEvent::Finished {
                 exec_elapsed,
-                max_elapsed,
-                min_elapsed,
                 avg_elapsed,
             } => {
                 spinner.finish_and_clear();
                 if iterations > 1 {
                     println!(
-                        "{} {} times in {}μs (max: {}ns, min: {}ns, avg: {}ns)\n",
+                        "{} {} times in {}μs (avg: {}ns)\n",
                         "Executed".bright_green().bold(),
                         iterations.cyan().bold(),
                         exec_elapsed.as_micros().yellow().bold(),
-                        max_elapsed.as_nanos().yellow().bold(),
-                        min_elapsed.as_nanos().yellow().bold(),
                         avg_elapsed.as_nanos().yellow().bold(),
                     );
                 } else {

@@ -42,12 +42,18 @@ fn print_value(
     }
 }
 
-pub fn print_outputs(blueprint: &IOBlueprint, ptrs: &[*mut ()], type_registry: &TypeRegistry) {
+pub fn print_outputs(
+    blueprint: &IOBlueprint,
+    ptrs: &[*mut ()],
+    iterations: usize,
+    type_registry: &TypeRegistry,
+) {
     println!("{}", " OUTPUTS ".on_bright_green().bold());
 
     for (item, ptr) in blueprint.get_outputs().iter().zip(ptrs.iter()) {
         print!("{}: ", item.name.bold());
-        print_value(*ptr as *const u8, &item.value_type, type_registry, 0);
+        let last_ptr = unsafe { (*ptr as *const u8).add((iterations - 1) * item.actual_size) };
+        print_value(last_ptr, &item.value_type, type_registry, 0);
         println!();
     }
 }

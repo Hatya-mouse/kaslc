@@ -7,7 +7,7 @@ pub fn print_input_header() {
     println!("{}", " INPUTS ".on_blue().bold());
 }
 
-pub fn print_inputs(inputs: &[BlueprintItem], type_registry: &TypeRegistry) {
+pub fn print_inputs(inputs: &[&BlueprintItem], type_registry: &TypeRegistry) {
     for input in inputs {
         let type_color = get_type_color(&input.value_type);
         let type_string = type_registry.format_type(&input.value_type);
@@ -19,7 +19,7 @@ pub fn print_inputs(inputs: &[BlueprintItem], type_registry: &TypeRegistry) {
     }
 }
 
-pub fn prompt_input(
+pub fn prompt_input_buffer(
     input: &BlueprintItem,
     type_registry: &TypeRegistry,
     index: usize,
@@ -34,6 +34,18 @@ pub fn prompt_input(
         input.name.bold(),
         index,
         iterations
+    );
+    stdout().flush().unwrap();
+}
+
+pub fn prompt_input_spread(input: &BlueprintItem, type_registry: &TypeRegistry) {
+    let type_color = get_type_color(&input.value_type);
+    let type_string = type_registry.format_type(&input.value_type);
+
+    print!(
+        "* Enter {} input for {}: ",
+        type_string.color(type_color).bold(),
+        input.name.bold(),
     );
     stdout().flush().unwrap();
 }

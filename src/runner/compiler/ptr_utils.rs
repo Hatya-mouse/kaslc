@@ -4,7 +4,7 @@ use std::alloc::{Layout, alloc, dealloc};
 // --- OUTPUT & INPUT BUFFER ALLOCATION ---
 
 pub(super) fn get_buffer_blueprint_ptr(
-    items: &[BlueprintItem],
+    items: Vec<&BlueprintItem>,
     buffer_size: usize,
 ) -> Vec<*mut ()> {
     let mut ptrs: Vec<*mut ()> = Vec::with_capacity(items.len());
@@ -23,7 +23,7 @@ pub(super) fn get_buffer_blueprint_ptr(
 }
 
 pub(super) fn deallocate_buffer_blueprint_ptr(
-    items: &[BlueprintItem],
+    items: Vec<&BlueprintItem>,
     ptrs: Vec<*mut ()>,
     buffer_size: usize,
 ) {
@@ -41,7 +41,7 @@ pub(super) fn deallocate_buffer_blueprint_ptr(
 
 // --- STATE ALLOCATION ---
 
-pub(super) fn get_blueprint_ptr(items: &[BlueprintItem]) -> Vec<*mut ()> {
+pub(super) fn get_blueprint_ptr(items: Vec<&BlueprintItem>) -> Vec<*mut ()> {
     let mut ptrs: Vec<*mut ()> = Vec::with_capacity(items.len());
     for item in items {
         let layout = Layout::from_size_align(item.actual_size, item.align as usize).unwrap();
@@ -60,7 +60,7 @@ pub(super) fn get_blueprint_ptr(items: &[BlueprintItem]) -> Vec<*mut ()> {
     ptrs
 }
 
-pub(super) fn deallocate_blueprint_ptr(items: &[BlueprintItem], ptrs: Vec<*mut ()>) {
+pub(super) fn deallocate_blueprint_ptr(items: Vec<&BlueprintItem>, ptrs: Vec<*mut ()>) {
     for (item, ptr) in items.iter().zip(ptrs) {
         let layout = Layout::from_size_align(item.actual_size, item.align as usize).unwrap();
 

@@ -8,8 +8,6 @@ pub(super) enum CompileEvent {
     Running,
     Finished {
         exec_elapsed: Duration,
-        max_elapsed: Duration,
-        min_elapsed: Duration,
         avg_elapsed: Duration,
     },
     Error(String),
