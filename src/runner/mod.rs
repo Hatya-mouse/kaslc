@@ -17,7 +17,7 @@ pub fn run_target(
     target_path: &Path,
     std_path: PathBuf,
     is_bench: bool,
-    iterations: usize,
+    iterations: i32,
     input_file: Option<&String>,
     preferred_lang: String,
 ) {

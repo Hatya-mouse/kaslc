@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 use std::{sync::mpsc, time::Duration};
 
 pub fn run_event_loop(
-    iterations: usize,
+    iterations: i32,
     file_path: &str,
     rx: mpsc::Receiver<CompileEvent>,
     ready_tx: mpsc::Sender<()>,

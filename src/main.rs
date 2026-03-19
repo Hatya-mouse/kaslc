@@ -62,7 +62,7 @@ fn main() {
                 target_path,
                 std_path.to_path_buf(),
                 false,
-                *iterations,
+                *iterations as i32,
                 input.as_ref(),
                 preferred_lang,
             );
@@ -83,7 +83,7 @@ fn main() {
                 target_path,
                 std_path.to_path_buf(),
                 true,
-                *iterations,
+                *iterations as i32,
                 input.as_ref(),
                 preferred_lang,
             );
