@@ -21,11 +21,11 @@ pub(super) fn get_blueprint_ptr(items: &[BlueprintItem]) -> Vec<*mut ()> {
 }
 
 pub(super) fn deallocate_blueprint_ptr(items: &[BlueprintItem], ptrs: Vec<*mut ()>) {
-    unsafe {
-        for (item, ptr) in items.iter().zip(ptrs) {
-            let layout = Layout::from_size_align(item.actual_size, item.align as usize).unwrap();
+    for (item, ptr) in items.iter().zip(ptrs) {
+        let layout = Layout::from_size_align(item.actual_size, item.align as usize).unwrap();
 
-            if !ptr.is_null() {
+        if !ptr.is_null() {
+            unsafe {
                 dealloc(ptr as *mut u8, layout);
             }
         }
