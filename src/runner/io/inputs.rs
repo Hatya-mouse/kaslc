@@ -1,5 +1,5 @@
 use crate::runner::{
-    compiler::ptr_utils::alloc_for_type,
+    compiler::ptr_utils::alloc_buf_for_type,
     ui::input_ui::{print_entered_input, print_input_header, print_inputs, prompt_input},
 };
 use kasl::{
@@ -32,6 +32,7 @@ impl Display for InputError {
 
 pub fn ask_for_inputs(
     blueprint: &IOBlueprint,
+    iterations: i32,
     type_registry: &TypeRegistry,
 ) -> Result<Vec<*mut ()>, InputError> {
     let inputs = blueprint.get_inputs();
@@ -50,27 +51,35 @@ pub fn ask_for_inputs(
 
     println!();
 
-    let mut parsed_inputs = Vec::new();
+    let mut ptrs = Vec::with_capacity(inputs.len());
     for input in inputs {
-        prompt_input(input, type_registry);
+        let mut str_value = String::new();
 
-        let str_value;
         match input.value_type {
             ResolvedType::Primitive(prim_type) => match prim_type {
                 PrimitiveType::Bool => {
-                    let value = ask_for_bool();
-                    parsed_inputs.push(alloc_for_type(value));
-                    str_value = value.to_string();
+                    for index in 0..iterations as usize {
+                        prompt_input(input, type_registry, index, iterations);
+                        let value = if ask_for_value::<bool>() { 1 } else { 0 };
+                        str_value
+                            .push_str(&ask_and_write::<i8>(&mut ptrs, value, index, iterations));
+                    }
                 }
                 PrimitiveType::Float => {
-                    let value: f32 = ask_for_number();
-                    parsed_inputs.push(alloc_for_type(value));
-                    str_value = value.to_string();
+                    for index in 0..iterations as usize {
+                        prompt_input(input, type_registry, index, iterations);
+                        let value = ask_for_value::<f32>();
+                        str_value
+                            .push_str(&ask_and_write::<f32>(&mut ptrs, value, index, iterations));
+                    }
                 }
                 PrimitiveType::Int => {
-                    let value: i32 = ask_for_number();
-                    parsed_inputs.push(alloc_for_type(value));
-                    str_value = value.to_string();
+                    for index in 0..iterations as usize {
+                        prompt_input(input, type_registry, index, iterations);
+                        let value = ask_for_value::<i32>();
+                        str_value
+                            .push_str(&ask_and_write::<i32>(&mut ptrs, value, index, iterations));
+                    }
                 }
                 PrimitiveType::Void => {
                     return Err(InputError::VoidInput);
@@ -82,28 +91,32 @@ pub fn ask_for_inputs(
         }
 
         print!("\x1b[1A\x1b[2K");
-        print_entered_input(input, &str_value);
+        print_entered_input(input, &format!("[{}]", str_value));
     }
 
-    Ok(parsed_inputs)
+    Ok(ptrs)
 }
 
-fn ask_for_bool() -> bool {
-    loop {
-        let mut input_str = String::new();
-
-        // Read the user'a input
-        io::stdin().read_line(&mut input_str).unwrap();
-
-        // Parse the input
-        match input_str.trim().parse::<bool>() {
-            Ok(value) => return value,
-            Err(_) => println!("Invalid input. Please enter a valid boolean."),
-        }
+fn ask_and_write<T: FromStr + Display>(
+    ptrs: &mut Vec<*mut ()>,
+    value: T,
+    index: usize,
+    iterations: i32,
+) -> String {
+    // Allocate a buffer for the type
+    let ptr = alloc_buf_for_type::<T>(iterations as usize);
+    // Write the value to the buffer
+    let value_string = value.to_string();
+    unsafe {
+        ptr.add(index).write(value);
     }
+    // Push the pointer to the vector
+    ptrs.push(ptr as *mut ());
+    // Stringify the value and return it
+    value_string
 }
 
-fn ask_for_number<T: FromStr>() -> T {
+fn ask_for_value<T: FromStr>() -> T {
     loop {
         let mut input_str = String::new();
 

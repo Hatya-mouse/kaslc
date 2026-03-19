@@ -19,14 +19,21 @@ pub fn print_inputs(inputs: &[BlueprintItem], type_registry: &TypeRegistry) {
     }
 }
 
-pub fn prompt_input(input: &BlueprintItem, type_registry: &TypeRegistry) {
+pub fn prompt_input(
+    input: &BlueprintItem,
+    type_registry: &TypeRegistry,
+    index: usize,
+    iterations: i32,
+) {
     let type_color = get_type_color(&input.value_type);
     let type_string = type_registry.format_type(&input.value_type);
 
     print!(
-        "* Enter {} input for {}: ",
+        "* Enter {} input for {} ({}/{}): ",
         type_string.color(type_color).bold(),
-        input.name.bold()
+        input.name.bold(),
+        index,
+        iterations
     );
     stdout().flush().unwrap();
 }

@@ -4,7 +4,10 @@ use crate::{
     print_err::print_err,
     runner::{
         CompileEvent,
-        compiler::ptr_utils::{deallocate_blueprint_ptr, get_blueprint_ptr},
+        compiler::ptr_utils::{
+            deallocate_blueprint_ptr, deallocate_buffer_blueprint_ptr, get_blueprint_ptr,
+            get_buffer_blueprint_ptr,
+        },
         io::{inputs::ask_for_inputs, outputs::print_outputs, toml_io::load_inputs_from_toml},
     },
 };
@@ -56,7 +59,7 @@ pub(super) fn spawn_compiler_thread(
 
         // If the input path is set, get the inputs from the file
         let inputs = if let Some(input_path) = input_path {
-            match load_inputs_from_toml(&blueprint, &input_path) {
+            match load_inputs_from_toml(&blueprint, iterations, &input_path) {
                 Ok(inputs) => inputs,
                 Err(e) => {
                     print_err(e);
@@ -64,8 +67,9 @@ pub(super) fn spawn_compiler_thread(
                 }
             }
         } else {
+            println!("Asking user for inputs");
             // Ask for inputs
-            match ask_for_inputs(&blueprint, &compiler.prog_ctx.type_registry) {
+            match ask_for_inputs(&blueprint, iterations, &compiler.prog_ctx.type_registry) {
                 Ok(inputs) => inputs,
                 Err(e) => {
                     print_err(e);
@@ -74,7 +78,7 @@ pub(super) fn spawn_compiler_thread(
             }
         };
 
-        let outputs = get_blueprint_ptr(blueprint.get_outputs());
+        let outputs = get_buffer_blueprint_ptr(blueprint.get_outputs(), iterations as usize);
         let states = get_blueprint_ptr(blueprint.get_states());
 
         println!();
@@ -114,7 +118,7 @@ pub(super) fn spawn_compiler_thread(
 
         print_outputs(&blueprint, &outputs, &compiler.prog_ctx.type_registry);
 
-        deallocate_blueprint_ptr(blueprint.get_outputs(), outputs);
+        deallocate_buffer_blueprint_ptr(blueprint.get_outputs(), outputs, iterations as usize);
         deallocate_blueprint_ptr(blueprint.get_states(), states);
     });
 }
