@@ -16,6 +16,7 @@ use std::{
 pub fn run_target(
     target_path: &Path,
     std_path: PathBuf,
+    is_bench: bool,
     iterations: usize,
     input_file: Option<&String>,
     preferred_lang: String,
@@ -34,7 +35,9 @@ pub fn run_target(
 
     // Create a compiler thread
     let input_path = input_file.map(PathBuf::from);
-    compiler::spawn_compiler_thread(std_path, input_path, code, iterations, tx, ready_rx);
+    compiler::spawn_compiler_thread(
+        std_path, input_path, code, is_bench, iterations, tx, ready_rx,
+    );
     run_event_loop(
         iterations,
         target_path.to_str().unwrap(),

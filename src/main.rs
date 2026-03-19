@@ -51,13 +51,18 @@ fn main() {
             let copy_path = Path::new(std_path.as_ref().unwrap_or(&default_std_path));
             install_std(copy_path).unwrap();
         }
-        Subcommands::Run { target_path, input } => {
+        Subcommands::Run {
+            target_path,
+            iterations,
+            input,
+        } => {
             let target_path = Path::new(target_path);
             let std_path = Path::new(&default_std_path);
             run_target(
                 target_path,
                 std_path.to_path_buf(),
-                1,
+                false,
+                *iterations,
                 input.as_ref(),
                 preferred_lang,
             );
@@ -77,6 +82,7 @@ fn main() {
             run_target(
                 target_path,
                 std_path.to_path_buf(),
+                true,
                 *iterations,
                 input.as_ref(),
                 preferred_lang,

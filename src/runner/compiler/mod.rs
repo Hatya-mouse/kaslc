@@ -15,6 +15,7 @@ pub(super) fn spawn_compiler_thread(
     std_path: PathBuf,
     input_path: Option<PathBuf>,
     code: String,
+    is_bench: bool,
     iterations: usize,
     tx: mpsc::Sender<CompileEvent>,
     ready_rx: mpsc::Receiver<()>,
@@ -84,9 +85,12 @@ pub(super) fn spawn_compiler_thread(
 
         // Run the program with the given inputs
         let mut iter_elapsed = Vec::new();
-        for _ in 0..iterations {
+        for i in 0..iterations {
+            let should_init = if is_bench || i == 0 { 1i8 } else { 0i8 };
+
             let exec_start = std::time::Instant::now();
-            if let Err(e) = compiler.run(&inputs, &outputs, &states, 1) {
+            // Run the program with the given inputs
+            if let Err(e) = compiler.run(&inputs, &outputs, &states, should_init) {
                 tx.send(CompileEvent::Error(e)).unwrap();
                 return;
             }
