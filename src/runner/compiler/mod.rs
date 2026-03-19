@@ -15,7 +15,6 @@ pub(super) fn spawn_compiler_thread(
     std_path: PathBuf,
     input_path: Option<PathBuf>,
     code: String,
-    is_bench: bool,
     iterations: i32,
     tx: mpsc::Sender<CompileEvent>,
     ready_rx: mpsc::Receiver<()>,
@@ -46,12 +45,7 @@ pub(super) fn spawn_compiler_thread(
         };
 
         // Compile the blueprint
-        if is_bench {
-            if let Err(e) = compiler.compile_once(&blueprint) {
-                tx.send(CompileEvent::KaslError(e, code)).unwrap();
-                return;
-            }
-        } else if let Err(e) = compiler.compile_buffer(&blueprint) {
+        if let Err(e) = compiler.compile_buffer(&blueprint) {
             tx.send(CompileEvent::KaslError(e, code)).unwrap();
             return;
         }
@@ -91,22 +85,12 @@ pub(super) fn spawn_compiler_thread(
         // Run the program with the given inputs
         let mut iter_elapsed = Vec::new();
 
-        if is_bench {
-            for i in 0..iterations {
-                let should_init = if is_bench || i == 0 { 1i8 } else { 0i8 };
+        for i in 0..iterations {
+            let should_init = if i == 0 { 1i8 } else { 0i8 };
 
-                let exec_start = std::time::Instant::now();
-                // Run the program with the given inputs
-                if let Err(e) = compiler.run_once(&inputs, &outputs, &states, should_init) {
-                    tx.send(CompileEvent::Error(e)).unwrap();
-                    return;
-                }
-                // Measure the elapsed time of execution
-                iter_elapsed.push(exec_start.elapsed());
-            }
-        } else {
             let exec_start = std::time::Instant::now();
-            if let Err(e) = compiler.run_buffer(&inputs, &outputs, &states, 1i8, iterations) {
+            // Run the program with the given inputs
+            if let Err(e) = compiler.run_once(&inputs, &outputs, &states, should_init) {
                 tx.send(CompileEvent::Error(e)).unwrap();
                 return;
             }

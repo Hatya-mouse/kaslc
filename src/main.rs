@@ -56,23 +56,7 @@ fn main() {
             iterations,
             input,
         } => {
-            let target_path = Path::new(target_path);
-            let std_path = Path::new(&default_std_path);
-            run_target(
-                target_path,
-                std_path.to_path_buf(),
-                false,
-                *iterations as i32,
-                input.as_ref(),
-                preferred_lang,
-            );
-        }
-        Subcommands::Bench {
-            target_path,
-            iterations,
-            input,
-        } => {
-            if iterations < &1 {
+            if *iterations < 1 {
                 print_err("Iterations must be greater than 0");
                 return;
             }
@@ -82,8 +66,7 @@ fn main() {
             run_target(
                 target_path,
                 std_path.to_path_buf(),
-                true,
-                *iterations as i32,
+                *iterations,
                 input.as_ref(),
                 preferred_lang,
             );

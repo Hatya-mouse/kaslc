@@ -16,24 +16,7 @@ pub enum Subcommands {
         target_path: String,
         /// Number of times to run the target KASL file.
         #[arg(long, short, default_value = "1")]
-        iterations: usize,
-        /// Path to the file to load as input.
-        #[arg(long)]
-        input: Option<String>,
-        // Path to the file to write output to.
-        // #[arg(long)]
-        // output: Option<String>,
-    },
-
-    /// Runs a target KASL files multiple times, and calculate min/max/average execution time and the standard deviation.
-    /// With this command, the state variables will be reset between each run. If you want to run the target KASL file without resetting the state variables,
-    /// use the `run` command with `iterations` argument.
-    Bench {
-        /// Path to the target KASL file to run.
-        target_path: String,
-        /// Number of times to run the target KASL file.
-        #[arg(long, short, default_value = "100")]
-        iterations: usize,
+        iterations: i32,
         /// Path to the file to load as input.
         #[arg(long)]
         input: Option<String>,
