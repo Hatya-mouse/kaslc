@@ -55,6 +55,7 @@ fn main() {
             target_path,
             iterations,
             input,
+            no_spread,
         } => {
             if *iterations < 1 {
                 print_err("Iterations must be greater than 0");
@@ -67,6 +68,7 @@ fn main() {
                 target_path,
                 std_path.to_path_buf(),
                 *iterations,
+                !*no_spread,
                 input.as_ref(),
                 preferred_lang,
             );

@@ -51,37 +51,28 @@ pub fn ask_for_inputs_buffer(
         match input.value_type {
             ResolvedType::Primitive(prim_type) => match prim_type {
                 PrimitiveType::Bool => {
-                    ptrs.push(
-                        alloc_and_write_each(iterations as usize, |index| {
-                            prompt_input_buffer(input, type_registry, index, iterations);
-                            let bool_val = ask_for_value::<bool>();
-                            str_values.push(bool_val.to_string());
-                            Result::<i8, ()>::Ok(if bool_val { 1i8 } else { 0i8 })
-                        })
-                        .unwrap(),
-                    );
+                    ptrs.push(alloc_and_write_each(iterations as usize, |index| {
+                        prompt_input_buffer(input, type_registry, index, iterations);
+                        let bool_val = ask_for_value::<bool>();
+                        str_values.push(bool_val.to_string());
+                        if bool_val { 1i8 } else { 0i8 }
+                    }));
                 }
                 PrimitiveType::Float => {
-                    ptrs.push(
-                        alloc_and_write_each(iterations as usize, |index| {
-                            prompt_input_buffer(input, type_registry, index, iterations);
-                            let float_val = ask_for_value::<f32>();
-                            str_values.push(float_val.to_string());
-                            Result::<f32, ()>::Ok(float_val)
-                        })
-                        .unwrap(),
-                    );
+                    ptrs.push(alloc_and_write_each(iterations as usize, |index| {
+                        prompt_input_buffer(input, type_registry, index, iterations);
+                        let float_val = ask_for_value::<f32>();
+                        str_values.push(float_val.to_string());
+                        float_val
+                    }));
                 }
                 PrimitiveType::Int => {
-                    ptrs.push(
-                        alloc_and_write_each(iterations as usize, |index| {
-                            prompt_input_buffer(input, type_registry, index, iterations);
-                            let int_val = ask_for_value::<i32>();
-                            str_values.push(int_val.to_string());
-                            Result::<i32, ()>::Ok(int_val)
-                        })
-                        .unwrap(),
-                    );
+                    ptrs.push(alloc_and_write_each(iterations as usize, |index| {
+                        prompt_input_buffer(input, type_registry, index, iterations);
+                        let int_val = ask_for_value::<i32>();
+                        str_values.push(int_val.to_string());
+                        int_val
+                    }));
                 }
                 PrimitiveType::Void => {
                     return Err(InputError::VoidInput);

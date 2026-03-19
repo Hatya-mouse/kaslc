@@ -20,6 +20,9 @@ pub enum Subcommands {
         /// Path to the file to load as input.
         #[arg(long)]
         input: Option<String>,
+        /// Whether not to spread the input across iterations.
+        #[arg(long, default_value = "false")]
+        no_spread: bool,
         // Path to the file to write output to.
         // #[arg(long)]
         // output: Option<String>,

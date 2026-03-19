@@ -1,17 +1,17 @@
 use crate::runner::compiler::ptr_utils::alloc_buf_for_type;
 
-pub fn alloc_and_write_each<T: Sized, E, F>(count: usize, mut get_value: F) -> Result<*mut (), E>
+pub fn alloc_and_write_each<T: Sized, F>(count: usize, mut get_value: F) -> *mut ()
 where
-    F: FnMut(usize) -> Result<T, E>,
+    F: FnMut(usize) -> T,
 {
     let ptr = alloc_buf_for_type::<T>(count);
     for i in 0..count {
-        let value = get_value(i)?;
+        let value = get_value(i);
         unsafe {
             ptr.add(i).write(value);
         }
     }
-    Ok(ptr as *mut ())
+    ptr as *mut ()
 }
 
 pub fn alloc_and_spread<T: Sized + Copy>(count: usize, value: T) -> *mut () {

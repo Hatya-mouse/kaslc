@@ -9,13 +9,17 @@ use crate::{
             get_buffer_blueprint_ptr,
         },
         io::{
-            inputs::{InputError, ask_for_inputs_buffer},
             outputs::print_outputs,
-            toml_io::load_inputs_from_toml,
+            toml_io::{load_inputs_buffer_from_toml, load_inputs_spread_from_toml},
+            user_inputs::{InputError, ask_for_inputs_buffer, ask_for_inputs_spread},
         },
     },
 };
-use kasl::{KaslCompiler, type_registry::ResolvedType};
+use kasl::{
+    KaslCompiler,
+    scope_manager::IOBlueprint,
+    type_registry::{ResolvedType, TypeRegistry},
+};
 use std::{path::PathBuf, sync::mpsc, thread};
 
 pub(super) fn spawn_compiler_thread(
@@ -23,6 +27,7 @@ pub(super) fn spawn_compiler_thread(
     input_path: Option<PathBuf>,
     code: String,
     iterations: i32,
+    should_spread: bool,
     tx: mpsc::Sender<CompileEvent>,
     ready_rx: mpsc::Receiver<()>,
 ) {
@@ -34,28 +39,10 @@ pub(super) fn spawn_compiler_thread(
         // Measure the elapsed time
         let build_start = std::time::Instant::now();
 
-        // Notify the main thread that parsing has started
-        tx.send(CompileEvent::Parsing).unwrap();
-        if let Err(e) = compiler.parse(&code) {
-            tx.send(CompileEvent::KaslError(vec![*e], code)).unwrap();
+        // Compile the program
+        let Some(blueprint) = compile_kasl(&tx, &mut compiler, code) else {
             return;
-        }
-
-        // Notify the main thread that building has started
-        tx.send(CompileEvent::Building).unwrap();
-        let blueprint = match compiler.build() {
-            Ok(blueprint) => blueprint,
-            Err(e) => {
-                tx.send(CompileEvent::KaslError(e, code)).unwrap();
-                return;
-            }
         };
-
-        // Compile the blueprint
-        if let Err(e) = compiler.compile_buffer(&blueprint) {
-            tx.send(CompileEvent::KaslError(e, code)).unwrap();
-            return;
-        }
 
         let build_elapsed = build_start.elapsed();
         tx.send(CompileEvent::Builded(build_elapsed)).unwrap();
@@ -71,23 +58,17 @@ pub(super) fn spawn_compiler_thread(
             return;
         }
 
-        let inputs = if let Some(input_path) = input_path {
-            match load_inputs_from_toml(&blueprint, iterations, &input_path) {
-                Ok(inputs) => inputs,
-                Err(e) => {
-                    print_err(e);
-                    return;
-                }
-            }
-        } else {
-            println!("Asking user for inputs");
-            // Ask for inputs
-            match ask_for_inputs_buffer(&blueprint, iterations, &compiler.prog_ctx.type_registry) {
-                Ok(inputs) => inputs,
-                Err(e) => {
-                    print_err(e);
-                    return;
-                }
+        let inputs = match get_inputs(
+            &blueprint,
+            iterations,
+            input_path,
+            should_spread,
+            &compiler.prog_ctx.type_registry,
+        ) {
+            Ok(inputs) => inputs,
+            Err(e) => {
+                tx.send(CompileEvent::Error(e)).unwrap();
+                return;
             }
         };
 
@@ -95,17 +76,17 @@ pub(super) fn spawn_compiler_thread(
         let states = get_blueprint_ptr(blueprint.get_states());
 
         println!();
-
-        // Measure the elapsed time of execution
         tx.send(CompileEvent::Running).unwrap();
 
+        // Measure the elapsed time of execution
         let exec_start = std::time::Instant::now();
+
         // Run the program with the given inputs
-        println!("Iterations: {}", iterations);
         if let Err(e) = compiler.run_buffer(&inputs, &outputs, &states, 1, iterations) {
             tx.send(CompileEvent::Error(e)).unwrap();
             return;
         }
+
         // Measure the elapsed time of execution
         let exec_elapsed = exec_start.elapsed();
 
@@ -128,4 +109,58 @@ pub(super) fn spawn_compiler_thread(
         deallocate_buffer_blueprint_ptr(blueprint.get_outputs(), outputs, iterations as usize);
         deallocate_blueprint_ptr(blueprint.get_states(), states);
     });
+}
+
+fn compile_kasl(
+    tx: &mpsc::Sender<CompileEvent>,
+    compiler: &mut KaslCompiler,
+    code: String,
+) -> Option<IOBlueprint> {
+    // Notify the main thread that parsing has started
+    tx.send(CompileEvent::Parsing).unwrap();
+    if let Err(e) = compiler.parse(&code) {
+        tx.send(CompileEvent::KaslError(vec![*e], code)).unwrap();
+        return None;
+    }
+
+    // Notify the main thread that building has started
+    tx.send(CompileEvent::Building).unwrap();
+    let blueprint = match compiler.build() {
+        Ok(blueprint) => blueprint,
+        Err(e) => {
+            tx.send(CompileEvent::KaslError(e, code)).unwrap();
+            return None;
+        }
+    };
+
+    // Compile the blueprint
+    if let Err(e) = compiler.compile_buffer(&blueprint) {
+        tx.send(CompileEvent::KaslError(e, code)).unwrap();
+        return None;
+    }
+
+    Some(blueprint)
+}
+
+fn get_inputs(
+    blueprint: &IOBlueprint,
+    iterations: i32,
+    input_path: Option<PathBuf>,
+    should_spread: bool,
+    type_registry: &TypeRegistry,
+) -> Result<Vec<*mut ()>, String> {
+    match (input_path, should_spread) {
+        (Some(path), false) => {
+            load_inputs_buffer_from_toml(blueprint, iterations, &path).map_err(|e| e.to_string())
+        }
+        (Some(path), true) => {
+            load_inputs_spread_from_toml(blueprint, iterations, &path).map_err(|e| e.to_string())
+        }
+        (None, false) => {
+            ask_for_inputs_buffer(blueprint, iterations, type_registry).map_err(|e| e.to_string())
+        }
+        (None, true) => {
+            ask_for_inputs_spread(blueprint, iterations, type_registry).map_err(|e| e.to_string())
+        }
+    }
 }

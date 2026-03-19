@@ -1,6 +1,6 @@
 use crate::runner::{
-    compiler::ptr_utils::alloc_buf_for_type,
     file_utils::{FileLoadError, get_file_contents},
+    io::blueprint_input::{alloc_and_spread, alloc_and_write_each},
     ui::input_ui::{print_entered_input, print_input_header},
 };
 use kasl::{
@@ -58,7 +58,7 @@ impl Display for TomlLoadError {
     }
 }
 
-pub fn load_inputs_from_toml(
+pub fn load_inputs_buffer_from_toml(
     blueprint: &IOBlueprint,
     iterations: i32,
     path: &Path,
@@ -80,40 +80,37 @@ pub fn load_inputs_from_toml(
 
         match &input.value_type {
             ResolvedType::Primitive(PrimitiveType::Bool) => {
-                let ptr = alloc_buf_for_type::<i8>(iterations as usize);
-                parse_and_write_array::<i8, _>(
+                let parsed_array = parse_array::<i8, _>(
                     raw_val,
-                    ptr,
                     iterations,
                     |v| v.as_bool().map(|b| if b { 1 } else { 0 }),
                     &input.name,
                     "Bool",
                 )?;
-                ptrs.push(ptr as *mut ());
+                let ptr = alloc_and_write_each(iterations as usize, |index| parsed_array[index]);
+                ptrs.push(ptr);
             }
             ResolvedType::Primitive(PrimitiveType::Float) => {
-                let ptr = alloc_buf_for_type::<f32>(iterations as usize);
-                parse_and_write_array::<f32, _>(
+                let parsed_array = parse_array::<f32, _>(
                     raw_val,
-                    ptr,
                     iterations,
                     |v| v.as_float().map(|f| f as f32),
                     &input.name,
                     "Float",
                 )?;
-                ptrs.push(ptr as *mut ());
+                let ptr = alloc_and_write_each(iterations as usize, |index| parsed_array[index]);
+                ptrs.push(ptr);
             }
             ResolvedType::Primitive(PrimitiveType::Int) => {
-                let ptr = alloc_buf_for_type::<i32>(iterations as usize);
-                parse_and_write_array::<i32, _>(
+                let parsed_array = parse_array::<i32, _>(
                     raw_val,
-                    ptr,
                     iterations,
                     |v| v.as_integer().map(|i| i as i32),
                     &input.name,
                     "Int",
                 )?;
-                ptrs.push(ptr as *mut ());
+                let ptr = alloc_and_write_each(iterations as usize, |index| parsed_array[index]);
+                ptrs.push(ptr);
             }
             ResolvedType::Primitive(PrimitiveType::Void) => {
                 return Err(TomlLoadError::VoidInput);
@@ -129,14 +126,75 @@ pub fn load_inputs_from_toml(
     Ok(ptrs)
 }
 
-fn parse_and_write_array<T, F>(
+pub fn load_inputs_spread_from_toml(
+    blueprint: &IOBlueprint,
+    iterations: i32,
+    path: &Path,
+) -> Result<Vec<*mut ()>, TomlLoadError> {
+    let content = get_file_contents(path).map_err(TomlLoadError::FileLoadError)?;
+    let table: HashMap<String, toml::Value> =
+        toml::from_str(&content).map_err(|err| TomlLoadError::ParseError(err.to_string()))?;
+    let inputs = blueprint.get_inputs();
+
+    // Initialize the pointer vector with capacity
+    let mut ptrs = Vec::with_capacity(inputs.len());
+
+    print_input_header();
+
+    for input in inputs {
+        let raw_val = table
+            .get(&input.name)
+            .ok_or_else(|| TomlLoadError::MissingField(input.name.clone()))?;
+
+        match &input.value_type {
+            ResolvedType::Primitive(PrimitiveType::Bool) => {
+                let bool_val = parse_scalar(
+                    raw_val,
+                    |v| v.as_bool().map(|b| if b { 1 } else { 0 }),
+                    &input.name,
+                    "Bool",
+                )?;
+                ptrs.push(alloc_and_spread(iterations as usize, bool_val));
+            }
+            ResolvedType::Primitive(PrimitiveType::Float) => {
+                let float_val = parse_scalar(
+                    raw_val,
+                    |v| v.as_float().map(|f| f as f32),
+                    &input.name,
+                    "Float",
+                )?;
+                ptrs.push(alloc_and_spread(iterations as usize, float_val));
+            }
+            ResolvedType::Primitive(PrimitiveType::Int) => {
+                let int_val = parse_scalar(
+                    raw_val,
+                    |v| v.as_integer().map(|i| i as i32),
+                    &input.name,
+                    "Int",
+                )?;
+                ptrs.push(alloc_and_spread(iterations as usize, int_val));
+            }
+            ResolvedType::Primitive(PrimitiveType::Void) => {
+                return Err(TomlLoadError::VoidInput);
+            }
+            ResolvedType::Struct(_) => {
+                return Err(TomlLoadError::NonPrimitiveInput);
+            }
+        };
+
+        print_entered_input(input, &raw_val.to_string());
+    }
+
+    Ok(ptrs)
+}
+
+fn parse_array<T, F>(
     array_item: &toml::Value,
-    ptr: *mut T,
     expected_len: i32,
     parser: F,
     name: &str,
     type_name: &str,
-) -> Result<(), TomlLoadError>
+) -> Result<Vec<T>, TomlLoadError>
 where
     T: Sized,
     F: Fn(&toml::Value) -> Option<T>,
@@ -151,11 +209,10 @@ where
             });
         }
 
-        for (index, value) in array.iter().enumerate() {
+        let mut result = Vec::with_capacity(array.len());
+        for value in array.iter() {
             if let Some(parsed) = parser(value) {
-                unsafe {
-                    ptr.add(index).write(parsed);
-                }
+                result.push(parsed);
             } else {
                 return Err(TomlLoadError::TypeMismatch {
                     name: name.to_string(),
@@ -164,8 +221,23 @@ where
             }
         }
 
-        Ok(())
+        Ok(result)
     } else {
         Err(TomlLoadError::NotAnArray(name.to_string()))
     }
+}
+
+fn parse_scalar<T, F>(
+    value: &toml::Value,
+    parser: F,
+    name: &str,
+    type_name: &str,
+) -> Result<T, TomlLoadError>
+where
+    F: Fn(&toml::Value) -> Option<T>,
+{
+    parser(value).ok_or_else(|| TomlLoadError::TypeMismatch {
+        name: name.to_string(),
+        expected: type_name.to_string(),
+    })
 }
