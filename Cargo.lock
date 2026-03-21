@@ -518,7 +518,7 @@ dependencies = [
 [[package]]
 name = "kasl"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl?branch=main#f070d78c1dc4b1567fa0a1cdaf916ae5f76d0a3b"
+source = "git+https://github.com/hatya-mouse/kasl?branch=main#278968b018210ebc7c6b9bb06b994b43ffa8a3c5"
 dependencies = [
  "cranelift",
  "cranelift-codegen",
