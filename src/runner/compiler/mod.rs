@@ -134,8 +134,6 @@ fn compile_kasl(
         }
     };
 
-    println!("{:#?}", compiler.prog_ctx.func_ctx);
-
     // Compile the blueprint
     if let Err(e) = compiler.compile_buffer(&blueprint) {
         tx.send(CompileEvent::KaslError(e, code)).unwrap();
