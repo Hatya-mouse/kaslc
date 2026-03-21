@@ -22,6 +22,21 @@ fn print_value(
                 PrimitiveType::Void => print!("()"),
             }
         },
+        ResolvedType::Array(array_id) => {
+            let array_decl = type_registry.get_array_decl(array_id).unwrap();
+            let item_type = array_decl.item_type();
+            let item_size = type_registry.get_type_actual_size(item_type).unwrap() as isize;
+
+            print!("[");
+            for i in 0..*array_decl.count() {
+                if i > 0 {
+                    print!(", ");
+                }
+                let item_ptr = unsafe { ptr.offset(item_size * i as isize) };
+                print_value(item_ptr, item_type, type_registry, indent);
+            }
+            print!("]");
+        }
         ResolvedType::Struct(struct_id) => {
             let struct_decl = type_registry.get_struct(struct_id).unwrap();
             println!("{} {{", struct_decl.name);
