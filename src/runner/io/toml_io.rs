@@ -115,7 +115,7 @@ pub fn load_inputs_buffer_from_toml(
             ResolvedType::Primitive(PrimitiveType::Void) => {
                 return Err(TomlLoadError::VoidInput);
             }
-            ResolvedType::Struct(_) => {
+            ResolvedType::Struct(_) | ResolvedType::Array(_) => {
                 return Err(TomlLoadError::NonPrimitiveInput);
             }
         };
@@ -177,7 +177,7 @@ pub fn load_inputs_spread_from_toml(
             ResolvedType::Primitive(PrimitiveType::Void) => {
                 return Err(TomlLoadError::VoidInput);
             }
-            ResolvedType::Struct(_) => {
+            ResolvedType::Struct(_) | ResolvedType::Array(_) => {
                 return Err(TomlLoadError::NonPrimitiveInput);
             }
         };

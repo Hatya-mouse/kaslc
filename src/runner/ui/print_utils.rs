@@ -9,6 +9,7 @@ pub(super) fn get_type_color(value_type: &ResolvedType) -> DynColors {
             PrimitiveType::Int => DynColors::Ansi(AnsiColors::Blue),
             PrimitiveType::Void => DynColors::Ansi(AnsiColors::White),
         },
+        ResolvedType::Array(_) => DynColors::Ansi(AnsiColors::Cyan),
         ResolvedType::Struct(_) => DynColors::Ansi(AnsiColors::Yellow),
     }
 }

@@ -78,8 +78,8 @@ pub fn ask_for_inputs_buffer(
                     return Err(InputError::VoidInput);
                 }
             },
-            ResolvedType::Struct(_) => {
-                unreachable!("This should have been caught by the any() check above")
+            ResolvedType::Struct(_) | ResolvedType::Array(_) => {
+                unreachable!("This should have been checked")
             }
         }
 
@@ -129,8 +129,8 @@ pub fn ask_for_inputs_spread(
                     return Err(InputError::VoidInput);
                 }
             },
-            ResolvedType::Struct(_) => {
-                unreachable!("This should have been caught by the any() check above")
+            ResolvedType::Struct(_) | ResolvedType::Array(_) => {
+                unreachable!("This should have been checked")
             }
         };
 
