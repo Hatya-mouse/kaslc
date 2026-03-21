@@ -149,7 +149,7 @@ fn get_inputs(
     input_path: Option<PathBuf>,
     should_spread: bool,
     type_registry: &TypeRegistry,
-) -> Result<Vec<*mut ()>, String> {
+) -> Result<Vec<*const ()>, String> {
     match (input_path, should_spread) {
         (Some(path), false) => {
             load_inputs_buffer_from_toml(blueprint, iterations, &path).map_err(|e| e.to_string())

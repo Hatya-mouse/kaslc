@@ -37,9 +37,9 @@ pub fn ask_for_inputs_buffer(
     blueprint: &IOBlueprint,
     iterations: i32,
     type_registry: &TypeRegistry,
-) -> Result<Vec<*mut ()>, InputError> {
+) -> Result<Vec<*const ()>, InputError> {
     let inputs = blueprint.get_inputs();
-    let mut ptrs = Vec::with_capacity(inputs.len());
+    let mut ptrs: Vec<*const ()> = Vec::with_capacity(inputs.len());
 
     print_input_header();
     print_inputs(&inputs, type_registry);
@@ -51,12 +51,15 @@ pub fn ask_for_inputs_buffer(
         match input.value_type {
             ResolvedType::Primitive(prim_type) => match prim_type {
                 PrimitiveType::Bool => {
-                    ptrs.push(alloc_and_write_each(iterations as usize, |index| {
-                        prompt_input_buffer(input, type_registry, index + 1, iterations);
-                        let bool_val = ask_for_value::<bool>();
-                        str_values.push(bool_val.to_string());
-                        if bool_val { 1i8 } else { 0i8 }
-                    }));
+                    ptrs.push(
+                        alloc_and_write_each(iterations as usize, |index| {
+                            prompt_input_buffer(input, type_registry, index + 1, iterations);
+                            let bool_val = ask_for_value::<bool>();
+                            str_values.push(bool_val.to_string());
+                            if bool_val { 1i8 } else { 0i8 }
+                        })
+                        .cast_const(),
+                    );
                 }
                 PrimitiveType::Float => {
                     ptrs.push(alloc_and_write_each(iterations as usize, |index| {
@@ -93,9 +96,9 @@ pub fn ask_for_inputs_spread(
     blueprint: &IOBlueprint,
     iterations: i32,
     type_registry: &TypeRegistry,
-) -> Result<Vec<*mut ()>, InputError> {
+) -> Result<Vec<*const ()>, InputError> {
     let inputs = blueprint.get_inputs();
-    let mut ptrs = Vec::with_capacity(inputs.len());
+    let mut ptrs: Vec<*const ()> = Vec::with_capacity(inputs.len());
 
     print_input_header();
     print_inputs(&inputs, type_registry);

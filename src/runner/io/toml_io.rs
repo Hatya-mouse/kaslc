@@ -62,14 +62,14 @@ pub fn load_inputs_buffer_from_toml(
     blueprint: &IOBlueprint,
     iterations: i32,
     path: &Path,
-) -> Result<Vec<*mut ()>, TomlLoadError> {
+) -> Result<Vec<*const ()>, TomlLoadError> {
     let content = get_file_contents(path).map_err(TomlLoadError::FileLoadError)?;
     let table: HashMap<String, toml::Value> =
         toml::from_str(&content).map_err(|err| TomlLoadError::ParseError(err.to_string()))?;
     let inputs = blueprint.get_inputs();
 
     // Initialize the pointer vector with capacity
-    let mut ptrs = Vec::with_capacity(inputs.len());
+    let mut ptrs: Vec<*const ()> = Vec::with_capacity(inputs.len());
 
     print_input_header();
 
@@ -130,14 +130,14 @@ pub fn load_inputs_spread_from_toml(
     blueprint: &IOBlueprint,
     iterations: i32,
     path: &Path,
-) -> Result<Vec<*mut ()>, TomlLoadError> {
+) -> Result<Vec<*const ()>, TomlLoadError> {
     let content = get_file_contents(path).map_err(TomlLoadError::FileLoadError)?;
     let table: HashMap<String, toml::Value> =
         toml::from_str(&content).map_err(|err| TomlLoadError::ParseError(err.to_string()))?;
     let inputs = blueprint.get_inputs();
 
     // Initialize the pointer vector with capacity
-    let mut ptrs = Vec::with_capacity(inputs.len());
+    let mut ptrs: Vec<*const ()> = Vec::with_capacity(inputs.len());
 
     print_input_header();
 
