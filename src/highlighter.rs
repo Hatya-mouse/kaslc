@@ -24,9 +24,8 @@ pub fn highlight(line: &str) -> String {
             let colored = match token.as_str() {
                 // Keywords
                 "func" | "let" | "var" | "if" | "else" | "return" | "import" | "struct"
-                | "input" | "output" | "state" | "static" | "infix" | "prefix" | "postfix" => {
-                    token.magenta().to_string()
-                }
+                | "loop" | "input" | "output" | "state" | "static" | "infix" | "prefix"
+                | "postfix" => token.magenta().to_string(),
                 // Primtive type names
                 "Float" | "Int" | "Bool" | "Void" => token.green().to_string(),
                 // Boolean literals
