@@ -49,11 +49,12 @@ pub(super) fn spawn_compiler_thread(
         ready_rx.recv().unwrap();
 
         // If the input has non-primitive type, warn user and skip asking for input
-        if blueprint
-            .get_inputs()
-            .iter()
-            .any(|input| matches!(input.value_type, ResolvedType::Struct(_)))
-        {
+        if blueprint.get_inputs().iter().any(|input| {
+            matches!(
+                input.value_type,
+                ResolvedType::Struct(_) | ResolvedType::Array(_)
+            )
+        }) {
             print_err(InputError::NonPrimitiveInput);
             return;
         }
