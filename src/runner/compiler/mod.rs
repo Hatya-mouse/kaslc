@@ -17,6 +17,7 @@ use crate::{
 };
 use kasl::{
     KaslCompiler,
+    run_program::run_buffer,
     scope_manager::IOBlueprint,
     type_registry::{ResolvedType, TypeRegistry},
 };
@@ -40,7 +41,7 @@ pub(super) fn spawn_compiler_thread(
         let build_start = std::time::Instant::now();
 
         // Compile the program
-        let Some(blueprint) = compile_kasl(&tx, &mut compiler, code) else {
+        let Some((program, blueprint)) = compile_kasl(&tx, &mut compiler, code) else {
             return;
         };
 
@@ -83,9 +84,8 @@ pub(super) fn spawn_compiler_thread(
         let exec_start = std::time::Instant::now();
 
         // Run the program with the given inputs
-        if let Err(e) = compiler.run_buffer(&inputs, &outputs, &states, 1, iterations) {
-            tx.send(CompileEvent::Error(e)).unwrap();
-            return;
+        unsafe {
+            run_buffer(program, &inputs, &outputs, &states, 1, iterations);
         }
 
         // Measure the elapsed time of execution
@@ -116,7 +116,7 @@ fn compile_kasl(
     tx: &mpsc::Sender<CompileEvent>,
     compiler: &mut KaslCompiler,
     code: String,
-) -> Option<IOBlueprint> {
+) -> Option<(*const u8, IOBlueprint)> {
     // Notify the main thread that parsing has started
     tx.send(CompileEvent::Parsing).unwrap();
     if let Err(e) = compiler.parse(&code) {
@@ -135,12 +135,15 @@ fn compile_kasl(
     };
 
     // Compile the blueprint
-    if let Err(e) = compiler.compile_buffer(&blueprint) {
-        tx.send(CompileEvent::KaslError(e, code)).unwrap();
-        return None;
-    }
+    let program = match compiler.compile_buffer(&blueprint) {
+        Ok(program) => program,
+        Err(e) => {
+            tx.send(CompileEvent::KaslError(e, code)).unwrap();
+            return None;
+        }
+    };
 
-    Some(blueprint)
+    Some((program, blueprint))
 }
 
 fn get_inputs(
