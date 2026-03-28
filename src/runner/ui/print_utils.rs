@@ -1,4 +1,4 @@
-use kasl::type_registry::{PrimitiveType, ResolvedType};
+use kasl::ast::type_registry::{PrimitiveType, ResolvedType};
 use owo_colors::{AnsiColors, DynColors};
 
 pub(super) fn get_type_color(value_type: &ResolvedType) -> DynColors {

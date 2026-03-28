@@ -1,4 +1,4 @@
-use kasl::{
+use kasl::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };

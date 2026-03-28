@@ -17,9 +17,11 @@ use crate::{
 };
 use kasl::{
     KaslCompiler,
+    ast::{
+        scope_manager::IOBlueprint,
+        type_registry::{ResolvedType, TypeRegistry},
+    },
     run_program::run_buffer,
-    scope_manager::IOBlueprint,
-    type_registry::{ResolvedType, TypeRegistry},
 };
 use std::{path::PathBuf, sync::mpsc, thread};
 

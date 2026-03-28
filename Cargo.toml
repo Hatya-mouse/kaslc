@@ -1,13 +1,13 @@
 [package]
 name = "kaslc"
-version = "0.1.25"
+version = "0.1.26"
 edition = "2024"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
 dirs = "6.0.0"
 indicatif = "0.18.4"
-kasl = { git = "https://github.com/hatya-mouse/kasl", branch = "main" }
+kasl = "0.1.2"
 owo-colors = "4.3.0"
 rust-embed = "8.11.0"
 toml = "1.0.7"
