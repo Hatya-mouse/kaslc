@@ -75,11 +75,16 @@ fn indicate_single_line(
 }
 
 fn offset_to_line_col(source: &str, offset: usize) -> (usize, usize) {
-    let line = source[..offset].chars().filter(|&c| c == '\n').count() + 1;
-    let col = source[..offset]
+    let clamped_offset = offset.min(source.len());
+    let line = source[..clamped_offset]
+        .chars()
+        .filter(|&c| c == '\n')
+        .count()
+        + 1;
+    let col = source[..clamped_offset]
         .rfind('\n')
-        .map(|i| offset - i - 1)
-        .unwrap_or(offset)
+        .map(|i| clamped_offset - i - 1)
+        .unwrap_or(clamped_offset)
         + 1;
     (line, col)
 }
