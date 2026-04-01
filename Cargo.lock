@@ -510,7 +510,7 @@ dependencies = [
 [[package]]
 name = "kasl-core"
 version = "0.1.4"
-source = "git+https://github.com/hatya-mouse/kasl-core#f9ebf0a449bdcfa452467a8baea865f65f90ead4"
+source = "git+https://github.com/hatya-mouse/kasl-core#238df555ba3f93d242601b6c0a9e8bb8a500e043"
 dependencies = [
  "hashbrown 0.16.1",
  "kasl-cranelift-backend",
