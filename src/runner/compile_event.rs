@@ -1,4 +1,4 @@
-use kasl::error::ErrorRecord;
+use kasl_core::error::ErrorRecord;
 use std::time::Duration;
 
 pub(super) enum CompileEvent {

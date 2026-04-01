@@ -15,7 +15,7 @@ use crate::{
         },
     },
 };
-use kasl::{
+use kasl_core::{
     KaslCompiler,
     ast::{
         scope_manager::IOBlueprint,
@@ -23,6 +23,7 @@ use kasl::{
     },
     run_program::run_buffer,
 };
+use kasl_cranelift_backend::CraneliftBackend;
 use std::{path::PathBuf, sync::mpsc, thread};
 
 pub(super) fn spawn_compiler_thread(
@@ -137,10 +138,19 @@ fn compile_kasl(
     };
 
     // Compile the blueprint
-    let program = match compiler.compile_buffer(&blueprint) {
+    let func = match compiler.compile_buffer(&blueprint) {
+        Ok(func) => func,
+        Err(e) => {
+            tx.send(CompileEvent::KaslError(vec![e], code)).unwrap();
+            return None;
+        }
+    };
+
+    let mut backend = CraneliftBackend::default();
+    let program = match backend.compile(func) {
         Ok(program) => program,
         Err(e) => {
-            tx.send(CompileEvent::KaslError(e, code)).unwrap();
+            tx.send(CompileEvent::Error(e)).unwrap();
             return None;
         }
     };

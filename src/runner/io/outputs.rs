@@ -1,4 +1,4 @@
-use kasl::ast::{
+use kasl_core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };
@@ -67,7 +67,8 @@ pub fn print_outputs(
 
     for (item, ptr) in blueprint.get_outputs().iter().zip(ptrs.iter()) {
         print!("{}: ", item.name.bold());
-        let last_ptr = unsafe { (*ptr as *const u8).add((iterations - 1) * item.actual_size) };
+        let last_ptr =
+            unsafe { (*ptr as *const u8).add((iterations - 1) * item.actual_size as usize) };
         print_value(last_ptr, &item.value_type, type_registry, 0);
         println!();
     }
