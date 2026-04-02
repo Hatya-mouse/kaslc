@@ -3,7 +3,7 @@ use crate::runner::{
     io::blueprint_input::{alloc_and_spread, alloc_and_write_each},
     ui::input_ui::{print_entered_input, print_input_header},
 };
-use kasl::core::ast::{
+use kasl_core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType},
 };

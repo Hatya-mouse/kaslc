@@ -5,7 +5,7 @@ use crate::runner::{
         prompt_input_spread,
     },
 };
-use kasl::core::ast::{
+use kasl_core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };

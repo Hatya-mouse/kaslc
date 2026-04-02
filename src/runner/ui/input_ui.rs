@@ -1,5 +1,5 @@
 use crate::runner::ui::print_utils::get_type_color;
-use kasl::core::ast::{scope_manager::BlueprintItem, type_registry::TypeRegistry};
+use kasl_core::ast::{scope_manager::BlueprintItem, type_registry::TypeRegistry};
 use owo_colors::OwoColorize;
 use std::io::{Write, stdout};
 
