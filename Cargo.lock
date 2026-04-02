@@ -510,10 +510,9 @@ dependencies = [
 [[package]]
 name = "kasl-core"
 version = "0.1.4"
-source = "git+https://github.com/hatya-mouse/kasl-core#238df555ba3f93d242601b6c0a9e8bb8a500e043"
+source = "git+https://github.com/hatya-mouse/kasl-core#4a416a95c48bc2783fe43b75717cba35d7419274"
 dependencies = [
  "hashbrown 0.16.1",
- "kasl-cranelift-backend",
  "kasl-ir",
  "peg",
  "rust-embed",
@@ -525,7 +524,7 @@ dependencies = [
 [[package]]
 name = "kasl-cranelift-backend"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-cranelift-backend#7cc9e6898370bad0dcbe753023efe17923eecc75"
+source = "git+https://github.com/hatya-mouse/kasl-cranelift-backend#5c0b63250e4949b7f656820a30f711b387047fd6"
 dependencies = [
  "cranelift",
  "cranelift-codegen",
@@ -538,7 +537,7 @@ dependencies = [
 [[package]]
 name = "kasl-ir"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-ir#5c1ce3ac2be8f6830411b1e49f2c32b929666b83"
+source = "git+https://github.com/hatya-mouse/kasl-ir#8183c260985057056e71b32a0f4b2e47419a7788"
 
 [[package]]
 name = "kaslc"
@@ -885,9 +884,9 @@ dependencies = [
 
 [[package]]
 name = "toml"
-version = "1.1.1+spec-1.1.0"
+version = "1.1.2+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "994b95d9e7bae62b34bab0e2a4510b801fa466066a6a8b2b57361fa1eba068ee"
+checksum = "81f3d15e84cbcd896376e6730314d59fb5a87f31e4b038454184435cd57defee"
 dependencies = [
  "indexmap",
  "serde_core",
@@ -909,9 +908,9 @@ dependencies = [
 
 [[package]]
 name = "toml_parser"
-version = "1.1.1+spec-1.1.0"
+version = "1.1.2+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39ca317ebc49f06bd748bfba29533eac9485569dc9bf80b849024b025e814fb9"
+checksum = "a2abe9b86193656635d2411dc43050282ca48aa31c2451210f4202550afb7526"
 dependencies = [
  "winnow",
 ]

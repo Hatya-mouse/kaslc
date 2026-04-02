@@ -36,15 +36,17 @@ pub(super) fn spawn_compiler_thread(
     ready_rx: mpsc::Receiver<()>,
 ) {
     thread::spawn(move || {
-        // Create a compiler and run the code
+        // Create a compiler and a backend, and run the code
         let mut compiler = KaslCompiler::default();
+        let mut backend = CraneliftBackend::default();
         compiler.add_search_path(std_path);
 
         // Measure the elapsed time
         let build_start = std::time::Instant::now();
 
         // Compile the program
-        let Some((program, blueprint)) = compile_kasl(&tx, &mut compiler, code) else {
+        let Some((program, blueprint)) = compile_kasl(&tx, &mut compiler, &mut backend, code)
+        else {
             return;
         };
 
@@ -118,6 +120,7 @@ pub(super) fn spawn_compiler_thread(
 fn compile_kasl(
     tx: &mpsc::Sender<CompileEvent>,
     compiler: &mut KaslCompiler,
+    backend: &mut CraneliftBackend,
     code: String,
 ) -> Option<(*const u8, IOBlueprint)> {
     // Notify the main thread that parsing has started
@@ -138,7 +141,7 @@ fn compile_kasl(
     };
 
     // Compile the blueprint
-    let func = match compiler.compile_buffer(&blueprint) {
+    let func = match compiler.lower_buffer(&blueprint) {
         Ok(func) => func,
         Err(e) => {
             tx.send(CompileEvent::KaslError(vec![e], code)).unwrap();
@@ -146,7 +149,6 @@ fn compile_kasl(
         }
     };
 
-    let mut backend = CraneliftBackend::default();
     let program = match backend.compile(func) {
         Ok(program) => program,
         Err(e) => {
