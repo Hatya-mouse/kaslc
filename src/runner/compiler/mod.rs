@@ -15,7 +15,7 @@ use crate::{
         },
     },
 };
-use kasl_core::{
+use kasl::core::{
     KaslCompiler,
     ast::{
         scope_manager::IOBlueprint,
@@ -23,7 +23,7 @@ use kasl_core::{
     },
     run_program::run_buffer,
 };
-use kasl_cranelift_backend::CraneliftBackend;
+use kasl::cranelift_backend::CraneliftBackend;
 use std::{path::PathBuf, sync::mpsc, thread};
 
 pub(super) fn spawn_compiler_thread(

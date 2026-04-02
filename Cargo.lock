@@ -508,9 +508,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "kasl"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "115b390f9bf9c83e94a19d8eed97632af839385899e77038c8863a0ab784e82b"
+dependencies = [
+ "kasl-core",
+ "kasl-cranelift-backend",
+ "kasl-ir",
+]
+
+[[package]]
 name = "kasl-core"
-version = "0.1.4"
-source = "git+https://github.com/hatya-mouse/kasl-core#4a416a95c48bc2783fe43b75717cba35d7419274"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1da0ad299ce5e8621c013dff57147a5be567d17462a6db9292133e5fe4451ab8"
 dependencies = [
  "hashbrown 0.16.1",
  "kasl-ir",
@@ -524,7 +536,8 @@ dependencies = [
 [[package]]
 name = "kasl-cranelift-backend"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-cranelift-backend#5c0b63250e4949b7f656820a30f711b387047fd6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "049e941799b84f31e4633aca6d061833f415dd7d438e733e2b35ed85898fdc3f"
 dependencies = [
  "cranelift",
  "cranelift-codegen",
@@ -537,7 +550,8 @@ dependencies = [
 [[package]]
 name = "kasl-ir"
 version = "0.1.0"
-source = "git+https://github.com/hatya-mouse/kasl-ir#8183c260985057056e71b32a0f4b2e47419a7788"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d47701276b8b5bc4eaa23203070eeb899e34bb59084580d949c70d6a62cd632"
 
 [[package]]
 name = "kaslc"
@@ -546,8 +560,7 @@ dependencies = [
  "clap",
  "dirs",
  "indicatif",
- "kasl-core",
- "kasl-cranelift-backend",
+ "kasl",
  "owo-colors",
  "rust-embed",
  "toml",

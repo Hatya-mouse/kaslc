@@ -1,4 +1,4 @@
-use kasl_core::ast::scope_manager::BlueprintItem;
+use kasl::core::ast::scope_manager::BlueprintItem;
 use std::alloc::{Layout, alloc, dealloc};
 
 // --- OUTPUT & INPUT BUFFER ALLOCATION ---
