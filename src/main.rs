@@ -14,7 +14,7 @@ use std::{env, path::Path};
 use subcommands::Subcommands;
 
 #[derive(RustEmbed)]
-#[folder = "kasl_std/std"]
+#[folder = "kasl-std/std"]
 struct StdLib;
 
 fn main() {
