@@ -70,7 +70,7 @@ pub(super) fn spawn_compiler_thread(
             iterations,
             input_path,
             should_spread,
-            &compiler.prog_ctx.type_registry,
+            &compiler.get_prog_ctx().type_registry,
         ) {
             Ok(inputs) => inputs,
             Err(e) => {
@@ -109,7 +109,7 @@ pub(super) fn spawn_compiler_thread(
             &blueprint,
             &outputs,
             iterations as usize,
-            &compiler.prog_ctx.type_registry,
+            &compiler.get_prog_ctx().type_registry,
         );
 
         deallocate_buffer_blueprint_ptr(blueprint.get_outputs(), outputs, iterations as usize);
