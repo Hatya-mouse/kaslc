@@ -3,6 +3,9 @@ name = "kaslc"
 version = "0.2.5"
 edition = "2024"
 license = "Apache-2.0"
+description = "A command-line tool to compile and run kasl programs."
+homepage = "https://kasl.hatya.dev"
+repository = "https://github.com/hatya-mouse/kaslc"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
