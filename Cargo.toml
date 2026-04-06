@@ -2,6 +2,7 @@
 name = "kaslc"
 version = "0.2.5"
 edition = "2024"
+license = "Apache-2.0"
 
 [dependencies]
 clap = { version = "4.6.0", features = ["derive"] }
@@ -11,3 +12,7 @@ kasl = { version = "0.2.6", features = ["cranelift"] }
 owo-colors = "4.3.0"
 rust-embed = "8.11.0"
 toml = "1.0.7"
+
+[[bin]]
+name = "kaslc"
+path = "src/main.rs"
