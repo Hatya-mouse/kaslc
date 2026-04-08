@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::core::ast::{
+use kadl::core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };

@@ -15,11 +15,11 @@
 //
 
 use crate::runner::{
-    file_utils::{FileLoadError, get_file_contents},
+    file_utils::{get_file_contents, FileLoadError},
     io::blueprint_input::{alloc_and_spread, alloc_and_write_each},
     ui::input_ui::{print_entered_input, print_input_header},
 };
-use kasl::core::ast::{
+use kadl::core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType},
 };

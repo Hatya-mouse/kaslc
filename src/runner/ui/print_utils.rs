@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::core::ast::type_registry::{PrimitiveType, ResolvedType};
+use kadl::core::ast::type_registry::{PrimitiveType, ResolvedType};
 use owo_colors::{AnsiColors, DynColors};
 
 pub(super) fn get_type_color(value_type: &ResolvedType) -> DynColors {

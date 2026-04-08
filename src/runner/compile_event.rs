@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-use kasl::core::error::ErrorRecord;
+use kadl::core::error::ErrorRecord;
 use std::time::Duration;
 
 pub(super) enum CompileEvent {

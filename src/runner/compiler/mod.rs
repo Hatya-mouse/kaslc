@@ -19,7 +19,6 @@ pub(super) mod ptr_utils;
 use crate::{
     print_err::print_err,
     runner::{
-        CompileEvent,
         compiler::ptr_utils::{
             deallocate_blueprint_ptr, deallocate_buffer_blueprint_ptr, get_blueprint_ptr,
             get_buffer_blueprint_ptr,
@@ -27,17 +26,18 @@ use crate::{
         io::{
             outputs::print_outputs,
             toml_io::{load_inputs_buffer_from_toml, load_inputs_spread_from_toml},
-            user_inputs::{InputError, ask_for_inputs_buffer, ask_for_inputs_spread},
+            user_inputs::{ask_for_inputs_buffer, ask_for_inputs_spread, InputError},
         },
+        CompileEvent,
     },
 };
-use kasl::core::{
-    KaslCompiler,
+use kadl::core::{
     ast::{
         scope_manager::IOBlueprint,
         type_registry::{ResolvedType, TypeRegistry},
     },
     run_program::run_buffer,
+    KaslCompiler,
 };
 use kasl::cranelift_backend::CraneliftBackend;
 use std::{path::PathBuf, sync::mpsc, thread};
