@@ -520,9 +520,9 @@ dependencies = [
 
 [[package]]
 name = "kasl-core"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7807031f0785227451340a75d8fc858827ba83d52f571635aab96744569ce556"
+checksum = "1d53042349a86703b4521531f5a235ff8d5baf795afcd6a959c8170857f4fe6b"
 dependencies = [
  "hashbrown 0.16.1",
  "kasl-ir",
@@ -555,7 +555,7 @@ checksum = "7d47701276b8b5bc4eaa23203070eeb899e34bb59084580d949c70d6a62cd632"
 
 [[package]]
 name = "kaslc"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "clap",
  "dirs",
