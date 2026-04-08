@@ -21,7 +21,7 @@ use crate::runner::{
         prompt_input_spread,
     },
 };
-use kadl::core::ast::{
+use kasl::core::ast::{
     scope_manager::IOBlueprint,
     type_registry::{PrimitiveType, ResolvedType, TypeRegistry},
 };

@@ -15,7 +15,7 @@
 //
 
 use crate::highlighter::highlight;
-use kadl::core::{ast::Range, error::ErrorRecord, localization::format_error};
+use kasl::core::{ast::Range, error::ErrorRecord, localization::format_error};
 use owo_colors::OwoColorize;
 
 pub fn indicate_error(record: &ErrorRecord, file_path: &str, source: &str, preferred_lang: &str) {
