@@ -28,4 +28,5 @@ pub(super) enum CompileEvent {
     },
     Error(String),
     KaslError(Vec<ErrorRecord>, String),
+    KaslWarning(Vec<ErrorRecord>, String),
 }

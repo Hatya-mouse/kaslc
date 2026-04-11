@@ -25,6 +25,14 @@ pub fn print_err_header(optional_message: Option<&str>) {
     );
 }
 
+pub fn print_warning_header(optional_message: Option<&str>) {
+    eprintln!(
+        "{} {}",
+        " WARNING ".on_yellow().bold(),
+        optional_message.unwrap_or("")
+    );
+}
+
 pub fn print_err(e: impl Display) {
     print_err_header(None);
     eprintln!("{}", e);

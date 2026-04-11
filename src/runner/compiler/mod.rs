@@ -149,7 +149,12 @@ fn compile_kasl(
     // Notify the main thread that building has started
     tx.send(CompileEvent::Building).unwrap();
     let blueprint = match compiler.build() {
-        Ok(blueprint) => blueprint,
+        Ok((blueprint, e)) => {
+            if !e.is_empty() {
+                tx.send(CompileEvent::KaslWarning(e, code.clone())).unwrap();
+            }
+            blueprint
+        }
         Err(e) => {
             tx.send(CompileEvent::KaslError(e, code)).unwrap();
             return None;

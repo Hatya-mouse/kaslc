@@ -15,7 +15,7 @@
 //
 
 use crate::{
-    print_err::{print_err, print_err_header},
+    print_err::{print_err, print_err_header, print_warning_header},
     runner::{CompileEvent, ui::error_formatting::indicate_error},
 };
 use indicatif::{ProgressBar, ProgressStyle};
@@ -76,6 +76,19 @@ pub fn run_event_loop(
                     );
                 }
                 ready_tx.send(()).unwrap();
+            }
+            CompileEvent::KaslWarning(errors, source) => {
+                spinner.finish_and_clear();
+                print_warning_header(Some(&format!("{} warnings", errors.len().bold())));
+                println!();
+                for (index, record) in errors.iter().enumerate() {
+                    indicate_error(record, file_path, &source, &preferred_lang);
+
+                    if index < errors.len() - 1 {
+                        println!();
+                    }
+                }
+                println!();
             }
             CompileEvent::KaslError(errors, source) => {
                 spinner.finish_and_clear();
