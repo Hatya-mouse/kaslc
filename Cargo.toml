@@ -1,6 +1,6 @@
 [package]
 name = "kaslc"
-version = "0.2.15"
+version = "0.2.16"
 edition = "2024"
 license = "Apache-2.0"
 description = "A command-line tool to compile and run kasl programs."
@@ -11,7 +11,7 @@ repository = "https://github.com/hatya-mouse/kaslc"
 clap = { version = "4.6.0", features = ["derive"] }
 dirs = "6.0.0"
 indicatif = "0.18.4"
-kasl = { version = "0.2.18", features = ["cranelift"] }
+kasl = { version = "0.2.19", features = ["cranelift"] }
 owo-colors = "4.3.0"
 rust-embed = "8.11.0"
 toml = "1.0.7"
