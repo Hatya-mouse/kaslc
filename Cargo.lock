@@ -555,7 +555,7 @@ checksum = "7d47701276b8b5bc4eaa23203070eeb899e34bb59084580d949c70d6a62cd632"
 
 [[package]]
 name = "kaslc"
-version = "0.2.16"
+version = "0.2.17"
 dependencies = [
  "clap",
  "dirs",
