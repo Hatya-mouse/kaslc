@@ -1,6 +1,6 @@
 [package]
 name = "kaslc"
-version = "0.2.17"
+version = "0.2.18"
 edition = "2024"
 license = "Apache-2.0"
 description = "A command-line tool to compile and run kasl programs."
